@@ -5,3 +5,4 @@
 /dist/
 /.qa/
 /.git-codex-old/
+supabase/.temp/

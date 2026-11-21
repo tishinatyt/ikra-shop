@@ -62,6 +62,13 @@ const organization = schema('Store', {
   ...(config.telegram && { sameAs: [config.telegram] })
 });
 const link = (prefix, path, label) => '<a href="' + e(prefix + path) + '">' + e(label) + '</a>';
+const phoneLink = config.phone ? link('', 'tel:' + config.phone, config.phoneDisplay || config.phone) : '';
+const headerPhone = config.phone ? '<a class="header-phone" href="tel:' + e(config.phone) + '" aria-label="Зателефонувати: ' +
+  e(config.phoneDisplay || config.phone) + '"><svg class="phone-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3H4a1 1 0 0 0-1 1c0 9.4 7.6 17 17 17a1 1 0 0 0 1-1v-3a1 1 0 0 0-.7-1l-4.3-1.2a1 1 0 0 0-1 .3l-1.4 1.7a13 13 0 0 1-6.4-6.4L9 9a1 1 0 0 0 .3-1L8 3.7A1 1 0 0 0 7 3z"/></svg><span>' +
+  e(config.phoneDisplay || config.phone) + '</span></a>' : '';
+const contactLinks = () => '<div class="contact-links">' + phoneLink +
+  [[config.telegram, 'Написати в Telegram'], [config.viber, 'Написати у Viber']].filter(([url]) => url)
+    .map(([url, label]) => '<a class="button secondary" href="' + e(url) + '">' + label + '</a>').join('') + '</div>';
 const varietyPath = key => 'ikra-' + varieties[key][0] + '/';
 const varietyLinks = prefix => '<ul class="variety-links">' + Object.keys(varieties)
   .map(key => '<li>' + link(prefix, varietyPath(key), 'Ікра ' + varieties[key][1]) + '</li>').join('') + '</ul>';
@@ -174,7 +181,7 @@ entry(warrantyPath, 'Гарантія натуральності ікри | Зо
 <li>Зверніться до нас протягом 14 днів із дня отримання замовлення.</li>
 <li>Передайте ікру на експертизу до незалежної акредитованої лабораторії та надайте нам її висновок.</li>
 <li>Якщо висновок підтвердить, що ікра не натуральна, ми повернемо 100% її вартості й компенсуємо витрати на експертизу протягом 7 днів після отримання висновку.</li>
-</ol></section></article>`, [breadcrumbSchema(warranty)], { query: 'гарантія натуральності ікри' });
+</ol><p>Звернутися щодо гарантії: ${phoneLink}</p></section></article>`, [breadcrumbSchema(warranty)], { query: 'гарантія натуральності ікри' });
 
 function filter(name, label, values, display) {
   return '<label>' + label + '<select name="' + name + '"><option value="">Усі</option>' +
@@ -213,7 +220,7 @@ entry(deliveryPath, deliveryTitle + ' | Золоте зерно', 'Достав�
 <p>${e(config.localDeliveryTerms)}</p>
 <section><h2>Як зберігаємо холод</h2><p>Пакуємо охолоджену ікру в термоупаковку, яка допомагає зберігати холод під час перевезення. Після отримання поставте банку в холодильник і орієнтуйтеся на температуру з етикетки.</p></section>
 <section><h2>Замовлення по Україні</h2><p>Відправляємо Новою поштою. Під час підтвердження замовлення узгоджуємо день відправлення. За можливості заберіть посилку одразу після прибуття.</p></section>
-<p>${link('../', 'katalog/', 'Перейти до каталогу')}</p></article>
+<p>${link('../', 'katalog/', 'Перейти до каталогу')}</p>${contactLinks()}</article>
 <section class="slab"><h2>Запитання про доставку</h2>${faqBody(deliveryFaq, '../')}</section>`,
 [breadcrumbSchema(deliveryCrumbs), faqSchema(deliveryFaq)], { query: 'ікра з доставкою Чернігів' });
 
@@ -280,16 +287,31 @@ for (const p of products) {
 }
 
 entry('koshyk/', 'Кошик і оформлення замовлення | Золоте зерно', 'Перевірте вибрані товари та їхню кількість, залиште контактні дані й оформіть замовлення ікри. Тут можна переглянути загальну вартість перед підтвердженням.', `
-<div class="slab">${crumb('../', basket)}<h1>Кошик</h1><noscript><p>Увімкніть JavaScript, щоб оформити замовлення.</p></noscript>
+<div class="slab">${crumb('../', basket)}<h1>Кошик</h1>${contactLinks()}<noscript><p>Увімкніть JavaScript, щоб оформити замовлення.</p></noscript>
 <p id="order-result" role="status" tabindex="-1"></p>
+<div id="order-fallback" class="contact-links" hidden>
+${config.phone ? '<a class="button secondary" href="tel:' + e(config.phone) + '">Зателефонувати</a>' : ''}
+${config.telegram ? '<a class="button secondary" href="' + e(config.telegram) + '">Написати в Telegram</a>' : ''}
+${config.viber ? '<a class="button secondary" href="' + e(config.viber) + '">Написати у Viber</a>' : ''}
+</div>
 <div class="checkout"><section aria-label="Товари у кошику"><div id="cart-items"></div><p id="cart-total"></p></section>
-<form id="order" class="order" hidden><h2>Доставка Новою поштою</h2>
-<label>Ім’я<input name="name" autocomplete="given-name" required maxlength="100"></label>
-<label>Телефон<input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+380 (00) 000-00-00" required></label>
+<form id="order" class="order" hidden><h2>Оформлення замовлення</h2>
+<label>Ім’я<input name="name" autocomplete="given-name" required maxlength="80"></label>
+<label>Телефон<input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+380 (00) 000-00-00" required maxlength="32"></label>
+<label>Спосіб доставки<select name="delivery" required>
+<option value="chernihiv">Доставка по Чернігову</option>
+<option value="novaposhta">Нова пошта по Україні</option>
+</select></label>
+<fieldset data-delivery="chernihiv">
+<label>Адреса в Чернігові<input name="address" autocomplete="street-address" required maxlength="180"></label>
+</fieldset>
+<fieldset data-delivery="novaposhta" disabled hidden>
 <label>Місто<input name="city" autocomplete="address-level2" required maxlength="100"></label>
-<label>Відділення Нової пошти<input name="branch" required maxlength="100"></label>
-<label>Коментар<textarea name="comment" rows="3" maxlength="500"></textarea></label>
-<label>Спосіб оплати<select name="payment" required>${config.paymentMethods.map(method => '<option value="' + e(method.id) + '">' + e(method.label) + '</option>').join('')}</select></label>
+<label>Відділення Нової пошти<input name="npBranch" required maxlength="120"></label>
+</fieldset>
+<label>Бажаний час (необов’язково)<input name="time" maxlength="60"></label>
+<label>Коментар<textarea name="comment" rows="3" maxlength="400"></textarea></label>
+<div hidden><label>Вебсайт<input name="website" tabindex="-1" autocomplete="off"></label></div>
 <button class="button primary">Підтвердити замовлення</button></form></div></div>`, [breadcrumbSchema(basket)], { noindex: true, query: 'оформлення замовлення ікри' });
 
 const missing = [...home, ['404.html', 'Сторінку не знайдено']];
@@ -377,8 +399,8 @@ ${base ? '<link rel="canonical" href="' + e(absolute(path)) + '"><meta property=
 <link rel="stylesheet" href="${e(prefix)}style.css"><script type="module" src="${e(prefix)}app.mjs"></script>
 ${path === '' ? '<script defer src="assets/js/roe.js"></script>' : ''}
 <script type="application/ld+json">${json([{ ...organization, logo: base ? absolute(organizationLogo) : prefix + organizationLogo }, ...page.structured])}</script></head><body>
-<a class="skip" href="#main">До вмісту</a><header><div class="wrap header"><a class="wordmark" href="${e(prefix || './')}">${logo('logo-compact.svg')}</a><nav aria-label="Головна навігація">${link(prefix, 'katalog/', 'Каталог')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, producerPath, 'Про виробника')}</nav><a class="basket" href="${e(prefix)}koshyk/">Кошик <span id="cart-count">0</span></a></div></header>
-<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}${config.phone ? link('', 'tel:' + config.phone, config.phone) : ''}${config.telegram ? link('', config.telegram, 'Telegram') : ''}</nav><nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav></div></footer><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
+<a class="skip" href="#main">До вмісту</a><header><div class="wrap header"><a class="wordmark" href="${e(prefix || './')}">${logo('logo-compact.svg')}</a><nav aria-label="Головна навігація">${link(prefix, 'katalog/', 'Каталог')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, producerPath, 'Про виробника')}</nav>${headerPhone}<a class="basket" href="${e(prefix)}koshyk/">Кошик <span id="cart-count">0</span></a></div></header>
+<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}</nav>${contactLinks()}<nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav></div></footer><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
 }
 const indexable = [...pages].filter(([, page]) => !page.noindex);
 await writeFile('dist/sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +

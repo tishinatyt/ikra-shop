@@ -1,0 +1,4 @@
+project_id = "ikra-shop"
+
+[functions.ikra-order]
+verify_jwt = false

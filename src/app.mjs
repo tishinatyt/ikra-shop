@@ -2,6 +2,8 @@ import { config } from './config.mjs';
 import { money, escape, productPath, selectSets } from './shop.mjs';
 
 const storageKey = 'golden-roe-cart-v1';
+const maxOrderItems = 30;
+const maxOrderQty = 50;
 const shopRoot = new URL('./', import.meta.url);
 const count = document.querySelector('#cart-count');
 const cartStatus = document.querySelector('#cart-status');
@@ -100,11 +102,15 @@ document.addEventListener('click', async event => {
     if (!items?.length) return;
     const next = { ...cart };
     for (const item of items) {
-      if ((next[item] ?? 0) >= 99) {
-        announce('У кошику може бути до 99 одиниць кожного товару.');
+      if ((next[item] ?? 0) >= maxOrderQty) {
+        announce('У кошику може бути до 50 одиниць кожного товару.');
         return;
       }
       next[item] = (next[item] ?? 0) + 1;
+    }
+    if (Object.keys(next).length > maxOrderItems) {
+      announce('В одному замовленні може бути до 30 різних товарів.');
+      return;
     }
     cart = next;
     saveCart();
@@ -153,9 +159,14 @@ const form = document.querySelector('#order');
 const list = document.querySelector('#cart-items');
 const total = document.querySelector('#cart-total');
 const result = document.querySelector('#order-result');
+const orderFallback = document.querySelector('#order-fallback');
 
 async function getLines() {
   return (await getProducts()).filter(p => Object.hasOwn(cart, p.id)).map(p => ({ ...p, quantity: cart[p.id] }));
+}
+function orderTotal(lines) {
+  return lines.some(p => p.price == null) ? null :
+    lines.reduce((sum, p) => sum + Math.round(p.price * 100) * p.quantity, 0) / 100;
 }
 function cartThumbnail(product) {
   if (!product.photo) return '<span class="ice-photo cart-thumbnail" aria-hidden="true"></span>';
@@ -167,10 +178,9 @@ function cartThumbnail(product) {
 async function renderOrder() {
   const lines = await getLines();
   const missing = Object.keys(cart).filter(id => !lines.some(p => p.id === id));
-  const totalPrice = lines.some(p => p.price == null) ? null :
-    lines.reduce((sum, p) => sum + Math.round(p.price * 100) * p.quantity, 0) / 100;
+  const totalPrice = orderTotal(lines);
   list.innerHTML = lines.map(p => `<article class="line-item"><div class="line-item-product">${cartThumbnail(p)}<div><a href="${escape(new URL(productPath(p), shopRoot).href)}">${escape(p.name)}</a><br>${money(p.price)}${p.availability === 'out' ? '<br>Немає в наявності' : ''}</div></div>
-<label>Кількість<input type="number" min="1" max="99" step="1" value="${p.quantity}" data-quantity="${escape(p.id)}"></label>
+<label>Кількість<input type="number" min="1" max="${maxOrderQty}" step="1" value="${p.quantity}" data-quantity="${escape(p.id)}"></label>
 <button class="button secondary" data-remove="${escape(p.id)}">Видалити</button></article>`).join('') + missing.map(id =>
     '<article class="line-item">Товар більше не представлено в каталозі <button class="button secondary" data-remove="' +
     escape(id) + '">Видалити</button></article>').join('');
@@ -187,12 +197,23 @@ function localDigits(value) {
 }
 
 if (form) {
+  const delivery = form.elements.namedItem('delivery');
+  const deliveryFields = [...form.querySelectorAll('[data-delivery]')];
+  function updateDelivery() {
+    for (const fieldset of deliveryFields) {
+      const inactive = fieldset.dataset.delivery !== delivery.value;
+      fieldset.disabled = inactive;
+      fieldset.hidden = inactive;
+    }
+  }
+  updateDelivery();
+  delivery.addEventListener('change', updateDelivery);
   renderOrder().catch(() => { list.textContent = 'Не вдалося завантажити кошик.'; });
   list.addEventListener('change', async event => {
     const id = event.target.dataset.quantity;
     if (!id || pending) return;
     const value = event.target.valueAsNumber;
-    if (Number.isInteger(value) && value >= 1 && value <= 99) {
+    if (Number.isInteger(value) && value >= 1 && value <= maxOrderQty) {
       cart = { ...cart, [id]: value };
       saveCart();
     }
@@ -224,15 +245,19 @@ if (form) {
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (pending) return;
+    orderFallback.hidden = true;
+    result.textContent = '';
     const fields = Object.fromEntries([...new FormData(form)].map(([key, value]) => [key, value.trim()]));
     const digits = localDigits(fields.phone);
-    if (digits.length !== 9) {
+    if (!/^[1-9]\d{8}$/.test(digits)) {
       phone.setCustomValidity('Введіть 9 цифр після +380.');
       phone.reportValidity();
       return;
     }
-    if (![fields.name, fields.city, fields.branch].every(Boolean)) {
-      result.textContent = 'Заповніть ім’я, місто та відділення.';
+    const required = fields.delivery === 'chernihiv' ? [fields.name, fields.address] :
+      [fields.name, fields.city, fields.npBranch];
+    if (!required.every(Boolean)) {
+      result.textContent = 'Заповніть ім’я та дані для вибраного способу доставки.';
       result.focus();
       return;
     }
@@ -244,8 +269,18 @@ if (form) {
       if (!lines.length || lines.length !== Object.keys(cart).length || lines.some(p => p.availability === 'out')) {
         throw new Error('Кошик змінився');
       }
+      if (lines.length > maxOrderItems || lines.some(p => p.quantity > maxOrderQty)) {
+        result.textContent = 'У замовленні може бути до 30 різних товарів і до 50 одиниць кожного.';
+        return;
+      }
+      const payable = orderTotal(lines);
+      if (payable == null || payable <= 0) {
+        result.textContent = 'Уточніть вартість товарів перед оформленням замовлення.';
+        return;
+      }
       const response = await config.submitOrder({ ...fields, phone: '+380' + digits,
-        items: lines.map(({ id, name, quantity, price }) => ({ id, name, quantity, price })) });
+        items: lines.map(({ id, name, quantity, price }) => ({ id, title: name, qty: quantity, price })),
+        total: payable });
       for (const { id, quantity } of lines) {
         const remaining = (cart[id] ?? 0) - quantity;
         if (remaining > 0) cart[id] = remaining;
@@ -253,10 +288,18 @@ if (form) {
       }
       saveCart();
       form.reset();
+      updateDelivery();
       await renderOrder();
       result.textContent = response.message;
-    } catch {
-      result.textContent = 'Не вдалося оформити замовлення. Перевірте кошик і спробуйте ще раз.';
+    } catch (error) {
+      if (error?.code === 'UNAVAILABLE') {
+        result.textContent = 'Не вдалося надіслати. Зателефонуйте: ' + config.phoneDisplay;
+        orderFallback.hidden = false;
+      } else if (error?.code === 'INVALID_CART') {
+        result.textContent = 'Перевірте кошик і спробуйте ще раз.';
+      } else {
+        result.textContent = 'Не вдалося оформити замовлення. Перевірте дані форми й спробуйте ще раз.';
+      }
     } finally {
       pending = false;
       submit.disabled = false;
