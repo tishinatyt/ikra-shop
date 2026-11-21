@@ -1,0 +1,543 @@
+[
+  {
+    "id": "rkp-1-03",
+    "slug": "rkp-1-03",
+    "name": "Ікра форелі «Золота Унція», 500 г · ск/б",
+    "species": "trout",
+    "brand": "Золота Унція",
+    "weight": 500,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 3426,
+    "photo": {
+      "small": "media/products/rkp-1-03-3f2ff6247c62-480.webp",
+      "large": "media/products/rkp-1-03-3f2ff6247c62-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-06",
+    "slug": "rkp-1-06",
+    "name": "Ікра форелі «Золота Унція», 190 г · ск/б",
+    "species": "trout",
+    "brand": "Золота Унція",
+    "weight": 190,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 1334,
+    "photo": {
+      "small": "media/products/rkp-1-06-ead6a6c7149f-480.webp",
+      "large": "media/products/rkp-1-06-ead6a6c7149f-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-10",
+    "slug": "rkp-1-10",
+    "name": "Ікра горбуші «Червоне Золото», 500 г · ск/б",
+    "species": "pink",
+    "brand": "Червоне Золото",
+    "weight": 500,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 6711,
+    "photo": {
+      "small": "media/products/rkp-1-10-fe2458f4e914-480.webp",
+      "large": "media/products/rkp-1-10-fe2458f4e914-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-12",
+    "slug": "rkp-1-12",
+    "name": "Ікра горбуші «Червоне Золото», 250 г · ск/б",
+    "species": "pink",
+    "brand": "Червоне Золото",
+    "weight": 250,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 2308,
+    "photo": {
+      "small": "media/products/rkp-1-12-0d26dc4fb2c1-480.webp",
+      "large": "media/products/rkp-1-12-0d26dc4fb2c1-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-13",
+    "slug": "rkp-1-13",
+    "name": "Ікра горбуші «Червоне Золото», 200 г · ск/б",
+    "species": "pink",
+    "brand": "Червоне Золото",
+    "weight": 200,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 2664,
+    "photo": {
+      "small": "media/products/rkp-1-13-e21dfbf81635-480.webp",
+      "large": "media/products/rkp-1-13-e21dfbf81635-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-14",
+    "slug": "rkp-1-14",
+    "name": "Ікра горбуші «Червоне Золото», 100 г · ск/б",
+    "species": "pink",
+    "brand": "Червоне Золото",
+    "weight": 100,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 1501,
+    "photo": {
+      "small": "media/products/rkp-1-14-6579980a45aa-480.webp",
+      "large": "media/products/rkp-1-14-6579980a45aa-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-16",
+    "slug": "rkp-1-16",
+    "name": "Ікра форелі «Червоне Золото», 500 г · ск/б",
+    "species": "trout",
+    "brand": "Червоне Золото",
+    "weight": 500,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 3593,
+    "photo": {
+      "small": "media/products/rkp-1-16-716b0e521f75-480.webp",
+      "large": "media/products/rkp-1-16-716b0e521f75-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-17",
+    "slug": "rkp-1-17",
+    "name": "Ікра форелі «Червоне Золото», 250 г · ск/б",
+    "species": "trout",
+    "brand": "Червоне Золото",
+    "weight": 250,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 1757,
+    "photo": {
+      "small": "media/products/rkp-1-17-ac0419221974-480.webp",
+      "large": "media/products/rkp-1-17-ac0419221974-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-18",
+    "slug": "rkp-1-18",
+    "name": "Ікра форелі «Червоне Золото», 200 г · ск/б",
+    "species": "trout",
+    "brand": "Червоне Золото",
+    "weight": 200,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 1419,
+    "photo": {
+      "small": "media/products/rkp-1-18-7d615e6e1f0b-480.webp",
+      "large": "media/products/rkp-1-18-7d615e6e1f0b-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-19",
+    "slug": "rkp-1-19",
+    "name": "Ікра форелі «Червоне Золото», 100 г · ск/б",
+    "species": "trout",
+    "brand": "Червоне Золото",
+    "weight": 100,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 729,
+    "photo": {
+      "small": "media/products/rkp-1-18-7d615e6e1f0b-480.webp",
+      "large": "media/products/rkp-1-18-7d615e6e1f0b-960.webp"
+    },
+    "photo_source": "similar"
+  },
+  {
+    "id": "rkp-1-22",
+    "slug": "rkp-1-22",
+    "name": "Ікра кети «Червоне Золото», 500 г · ск/б",
+    "species": "chum",
+    "brand": "Червоне Золото",
+    "weight": 500,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 7336,
+    "photo": {
+      "small": "media/products/rkp-1-22-336ed189a3cd-480.webp",
+      "large": "media/products/rkp-1-22-336ed189a3cd-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-24",
+    "slug": "rkp-1-24",
+    "name": "Ікра кети «Червоне Золото», 250 г · ск/б",
+    "species": "chum",
+    "brand": "Червоне Золото",
+    "weight": 250,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 3628,
+    "photo": {
+      "small": "media/products/rkp-1-24-4fff7a3935c1-480.webp",
+      "large": "media/products/rkp-1-24-4fff7a3935c1-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-25",
+    "slug": "rkp-1-25",
+    "name": "Ікра кети «Червоне Золото», 200 г · ск/б",
+    "species": "chum",
+    "brand": "Червоне Золото",
+    "weight": 200,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 2913,
+    "photo": {
+      "small": "media/products/rkp-1-25-6a0ed7bed64d-480.webp",
+      "large": "media/products/rkp-1-25-6a0ed7bed64d-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-26",
+    "slug": "rkp-1-26",
+    "name": "Ікра кети «Червоне Золото», 100 г · ск/б",
+    "species": "chum",
+    "brand": "Червоне Золото",
+    "weight": 100,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 1611,
+    "photo": {
+      "small": "media/products/rkp-1-26-8540c7cd69ef-480.webp",
+      "large": "media/products/rkp-1-26-8540c7cd69ef-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-28",
+    "slug": "rkp-1-28",
+    "name": "Ікра нерки «Червоне Золото», 500 г · ск/б",
+    "species": "sockeye",
+    "brand": "Червоне Золото",
+    "weight": 500,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 6359,
+    "photo": {
+      "small": "media/products/rkp-1-30-5540fea26e1d-480.webp",
+      "large": "media/products/rkp-1-30-5540fea26e1d-960.webp"
+    },
+    "photo_source": "similar"
+  },
+  {
+    "id": "rkp-1-29",
+    "slug": "rkp-1-29",
+    "name": "Ікра нерки «Червоне Золото», 250 г · ск/б",
+    "species": "sockeye",
+    "brand": "Червоне Золото",
+    "weight": 250,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 3159,
+    "photo": {
+      "small": "media/products/rkp-1-30-5540fea26e1d-480.webp",
+      "large": "media/products/rkp-1-30-5540fea26e1d-960.webp"
+    },
+    "photo_source": "similar"
+  },
+  {
+    "id": "rkp-1-30",
+    "slug": "rkp-1-30",
+    "name": "Ікра нерки «Червоне Золото», 200 г · ск/б",
+    "species": "sockeye",
+    "brand": "Червоне Золото",
+    "weight": 200,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 2536,
+    "photo": {
+      "small": "media/products/rkp-1-30-5540fea26e1d-480.webp",
+      "large": "media/products/rkp-1-30-5540fea26e1d-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-31",
+    "slug": "rkp-1-31",
+    "name": "Ікра нерки «Червоне Золото», 100 г · ск/б",
+    "species": "sockeye",
+    "brand": "Червоне Золото",
+    "weight": 100,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "out",
+    "visible": true,
+    "price": 1448,
+    "photo": {
+      "small": "media/products/rkp-1-31-195f8b0d6c09-480.webp",
+      "large": "media/products/rkp-1-31-195f8b0d6c09-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-32",
+    "slug": "rkp-1-32",
+    "name": "Ікра кижуча «Червоне Золото», 500 г · ск/б",
+    "species": "coho",
+    "brand": "Червоне Золото",
+    "weight": 500,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 6959,
+    "photo": {
+      "small": "media/products/rkp-1-34-6bdffc2e88c0-480.webp",
+      "large": "media/products/rkp-1-34-6bdffc2e88c0-960.webp"
+    },
+    "photo_source": "similar"
+  },
+  {
+    "id": "rkp-1-33",
+    "slug": "rkp-1-33",
+    "name": "Ікра кижуча «Червоне Золото», 250 г · ск/б",
+    "species": "coho",
+    "brand": "Червоне Золото",
+    "weight": 250,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 3459,
+    "photo": {
+      "small": "media/products/rkp-1-34-6bdffc2e88c0-480.webp",
+      "large": "media/products/rkp-1-34-6bdffc2e88c0-960.webp"
+    },
+    "photo_source": "similar"
+  },
+  {
+    "id": "rkp-1-34",
+    "slug": "rkp-1-34",
+    "name": "Ікра кижуча «Червоне Золото», 200 г · ск/б",
+    "species": "coho",
+    "brand": "Червоне Золото",
+    "weight": 200,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "out",
+    "visible": true,
+    "price": 2776,
+    "photo": {
+      "small": "media/products/rkp-1-34-6bdffc2e88c0-480.webp",
+      "large": "media/products/rkp-1-34-6bdffc2e88c0-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-35",
+    "slug": "rkp-1-35",
+    "name": "Ікра кижуча «Червоне Золото», 100 г · ск/б",
+    "species": "coho",
+    "brand": "Червоне Золото",
+    "weight": 100,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "out",
+    "visible": true,
+    "price": 1568,
+    "photo": {
+      "small": "media/products/rkp-1-35-15d3e6710e46-480.webp",
+      "large": "media/products/rkp-1-35-15d3e6710e46-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-36",
+    "slug": "rkp-1-36",
+    "name": "Ікра чавичі «Червоне Золото», 500 г · ск/б",
+    "species": "chinook",
+    "brand": "Червоне Золото",
+    "weight": 500,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 7547,
+    "photo": {
+      "small": "media/products/rkp-1-36-1e6b267927c0-480.webp",
+      "large": "media/products/rkp-1-36-1e6b267927c0-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-37",
+    "slug": "rkp-1-37",
+    "name": "Ікра чавичі «Червоне Золото», 250 г · ск/б",
+    "species": "chinook",
+    "brand": "Червоне Золото",
+    "weight": 250,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 3735,
+    "photo": {
+      "small": "media/products/rkp-1-37-b7d8c9eca031-480.webp",
+      "large": "media/products/rkp-1-37-b7d8c9eca031-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-38",
+    "slug": "rkp-1-38",
+    "name": "Ікра чавичі «Червоне Золото», 200 г · ск/б",
+    "species": "chinook",
+    "brand": "Червоне Золото",
+    "weight": 200,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 3002,
+    "photo": {
+      "small": "media/products/rkp-1-38-425665d5bf88-480.webp",
+      "large": "media/products/rkp-1-38-425665d5bf88-960.webp"
+    }
+  },
+  {
+    "id": "rkp-1-39",
+    "slug": "rkp-1-39",
+    "name": "Ікра чавичі «Червоне Золото», 100 г · ск/б",
+    "species": "chinook",
+    "brand": "Червоне Золото",
+    "weight": 100,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 1659,
+    "photo": {
+      "small": "media/products/rkp-1-39-8540c7cd69ef-480.webp",
+      "large": "media/products/rkp-1-39-8540c7cd69ef-960.webp"
+    }
+  },
+  {
+    "id": "rkp-2-05",
+    "slug": "rkp-2-05",
+    "name": "Ікра кети «Острів», 190 г · ск/б",
+    "species": "chum",
+    "brand": "Острів",
+    "weight": 190,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 1431,
+    "photo": {
+      "small": "media/products/rkp-2-05-bfa586e9a2ff-480.webp",
+      "large": "media/products/rkp-2-05-bfa586e9a2ff-960.webp"
+    }
+  },
+  {
+    "id": "rkp-2-06",
+    "slug": "rkp-2-06",
+    "name": "Ікра кети «Острів», 100 г · ск/б",
+    "species": "chum",
+    "brand": "Острів",
+    "weight": 100,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 772,
+    "photo": {
+      "small": "media/products/rkp-2-06-dc9063aac366-480.webp",
+      "large": "media/products/rkp-2-06-dc9063aac366-960.webp"
+    }
+  },
+  {
+    "id": "rkp-2-07",
+    "slug": "rkp-2-07",
+    "name": "Ікра кети «Острів», 100 г · ж/б",
+    "species": "chum",
+    "brand": "Острів",
+    "weight": 100,
+    "packaging": "metal",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 789,
+    "photo": {
+      "small": "media/products/rkp-2-05-bfa586e9a2ff-480.webp",
+      "large": "media/products/rkp-2-05-bfa586e9a2ff-960.webp"
+    },
+    "photo_source": "similar"
+  },
+  {
+    "id": "rkp-2-15",
+    "slug": "rkp-2-15",
+    "name": "Ікра горбуші «LEMBERG», 120 г · ж/б",
+    "species": "pink",
+    "brand": "LEMBERG",
+    "weight": 120,
+    "packaging": "metal",
+    "temperature": "0…+6 °C",
+    "availability": "in",
+    "visible": true,
+    "price": 749,
+    "photo": null
+  },
+  {
+    "id": "rkp-2-17",
+    "slug": "rkp-2-17",
+    "name": "Ікра щуки «CAVIAR», 100 г · ск/б",
+    "species": "pike",
+    "brand": "CAVIAR",
+    "weight": 100,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "out",
+    "visible": true,
+    "price": 629,
+    "photo": null
+  },
+  {
+    "id": "rkp-2-18",
+    "slug": "rkp-2-18",
+    "name": "Ікра щуки «CAVIAR», 230 г · ск/б",
+    "species": "pike",
+    "brand": "CAVIAR",
+    "weight": 230,
+    "packaging": "glass",
+    "temperature": "0…+6 °C",
+    "availability": "out",
+    "visible": true,
+    "price": 1339,
+    "photo": null
+  }
+]

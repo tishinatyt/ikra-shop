@@ -1,0 +1,266 @@
+import { config } from './config.mjs';
+import { money, escape, productPath, selectSets } from './shop.mjs';
+
+const storageKey = 'golden-roe-cart-v1';
+const shopRoot = new URL('./', import.meta.url);
+const count = document.querySelector('#cart-count');
+const cartStatus = document.querySelector('#cart-status');
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const notice = document.querySelector('#notice');
+const seasonBanner = document.querySelector('[data-season-until]');
+if (seasonBanner) {
+  const date = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Kyiv', dateStyle: 'short' }).format(new Date());
+  seasonBanner.hidden = date > seasonBanner.dataset.seasonUntil;
+}
+let cart = {};
+let timer;
+let cartStatusTimer;
+let cartBounce;
+let products;
+let pending = false;
+
+function loadCart() {
+  try {
+    const value = JSON.parse(localStorage.getItem(storageKey) ?? '{}');
+    return Object.fromEntries(Object.entries(value).filter(([, qty]) => Number.isInteger(qty) && qty > 0 && qty <= 99));
+  } catch {
+    return {};
+  }
+}
+function saveCart() {
+  try { localStorage.setItem(storageKey, JSON.stringify(cart)); } catch { /* In-memory cart is still usable. */ }
+  updateCount();
+}
+function updateCount() {
+  count.textContent = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+}
+function announce(message) {
+  clearTimeout(timer);
+  notice.textContent = message;
+  timer = setTimeout(() => { notice.textContent = ''; }, 3200);
+}
+function confirmAdd(button) {
+  clearTimeout(cartStatusTimer);
+  cartStatus.textContent = '';
+  cartStatusTimer = setTimeout(() => { cartStatus.textContent = 'Додано в кошик'; }, 40);
+  if (reduceMotion.matches || !button.animate) return;
+
+  const from = button.getBoundingClientRect();
+  const to = count.getBoundingClientRect();
+  const sx = from.left + from.width / 2;
+  const sy = from.top + from.height / 2;
+  const dx = to.left + to.width / 2 - sx;
+  const dy = to.top + to.height / 2 - sy;
+  const lift = Math.min(95, 35 + Math.hypot(dx, dy) * .16);
+  const grain = document.createElement('span');
+  grain.className = 'roe-flight';
+  grain.setAttribute('aria-hidden', 'true');
+  document.body.append(grain);
+
+  const positions = Array.from({ length: 13 }, (_, i) => {
+    const t = i / 12;
+    return { transform: 'translate(' + (sx + dx * t - 9) + 'px,' +
+      (sy + dy * t - 4 * lift * t * (1 - t) - 9) + 'px) scale(' + (1 - .35 * t) + ')' };
+  });
+  const flight = grain.animate(positions, { duration: 600, easing: 'cubic-bezier(.25,.65,.5,1)' });
+  flight.oncancel = () => grain.remove();
+  flight.onfinish = () => {
+    grain.remove();
+    if (reduceMotion.matches) return;
+    cartBounce?.cancel();
+    cartBounce = count.animate([
+      { transform: 'translateY(0)' }, { transform: 'translateY(-4px) scale(1.14)' }, { transform: 'translateY(0)' }
+    ], { duration: 240, easing: 'ease-out' });
+  };
+}
+function getProducts() {
+  products ??= fetch(new URL('products.json', shopRoot)).then(async response => {
+    if (!response.ok) throw new Error('Не вдалося завантажити каталог');
+    return response.json();
+  }).catch(error => { products = undefined; throw error; });
+  return products;
+}
+
+cart = loadCart();
+updateCount();
+window.addEventListener('storage', event => {
+  if (event.key !== storageKey && event.key !== null) return;
+  cart = loadCart();
+  updateCount();
+  if (document.querySelector('#order') && !pending) renderOrder().catch(() => announce('Не вдалося завантажити кошик.'));
+});
+document.addEventListener('click', async event => {
+  const button = event.target.closest('[data-add]');
+  if (!button) return;
+  const id = button.dataset.add;
+  try {
+    const items = button.dataset.kind === 'set'
+      ? selectSets(await getProducts()).find(set => set.id === id)?.items.map(item => item.id)
+      : [id];
+    if (!items?.length) return;
+    const next = { ...cart };
+    for (const item of items) {
+      if ((next[item] ?? 0) >= 99) {
+        announce('У кошику може бути до 99 одиниць кожного товару.');
+        return;
+      }
+      next[item] = (next[item] ?? 0) + 1;
+    }
+    cart = next;
+    saveCart();
+    confirmAdd(button);
+  } catch {
+    announce('Не вдалося додати товар. Спробуйте ще раз.');
+  }
+});
+
+const filters = document.querySelector('#filters');
+if (filters && !filters.hidden) {
+  const catalog = document.querySelector('#catalog');
+  const cards = new Map([...catalog.children].map(card => [card.dataset.id, card]));
+  const results = document.querySelector('#results');
+  async function filterCatalog() {
+    try {
+      const source = await getProducts();
+      const options = new FormData(filters);
+      const selected = source.filter(p => {
+        for (const key of ['species', 'brand', 'weight', 'packaging', 'availability']) {
+          if (options.get(key) && String(p[key]) !== options.get(key)) return false;
+        }
+        const min = options.get('min');
+        const max = options.get('max');
+        return (!min || (p.price != null && p.price >= Number(min))) &&
+          (!max || (p.price != null && p.price <= Number(max)));
+      });
+      const sort = options.get('sort');
+      if (sort === 'name') selected.sort((a, b) => a.name.localeCompare(b.name, 'uk'));
+      if (sort === 'asc' || sort === 'desc') selected.sort((a, b) => {
+        if (a.price == null || b.price == null) return Number(a.price == null) - Number(b.price == null);
+        return sort === 'asc' ? a.price - b.price : b.price - a.price;
+      });
+      catalog.replaceChildren(...selected.map(p => cards.get(p.id)));
+      results.textContent = selected.length ? 'Товарів: ' + selected.length : 'За цими фільтрами товарів немає.';
+    } catch {
+      announce('Не вдалося оновити каталог.');
+    }
+  }
+  filters.addEventListener('input', filterCatalog);
+  filters.addEventListener('reset', () => setTimeout(filterCatalog, 0));
+  filters.addEventListener('submit', event => event.preventDefault());
+}
+
+const form = document.querySelector('#order');
+const list = document.querySelector('#cart-items');
+const total = document.querySelector('#cart-total');
+const result = document.querySelector('#order-result');
+
+async function getLines() {
+  return (await getProducts()).filter(p => Object.hasOwn(cart, p.id)).map(p => ({ ...p, quantity: cart[p.id] }));
+}
+function cartThumbnail(product) {
+  if (!product.photo) return '<span class="ice-photo cart-thumbnail" aria-hidden="true"></span>';
+  const source = new URL(product.photo.small, shopRoot).href;
+  return '<span class="ice-photo cart-thumbnail"><img class="' +
+    (product.photo.multiplySmall ? 'photo-multiply' : '') + '" src="' + escape(source) +
+    '" alt="" width="64" height="64" decoding="async"></span>';
+}
+async function renderOrder() {
+  const lines = await getLines();
+  const missing = Object.keys(cart).filter(id => !lines.some(p => p.id === id));
+  const totalPrice = lines.some(p => p.price == null) ? null :
+    lines.reduce((sum, p) => sum + Math.round(p.price * 100) * p.quantity, 0) / 100;
+  list.innerHTML = lines.map(p => `<article class="line-item"><div class="line-item-product">${cartThumbnail(p)}<div><a href="${escape(new URL(productPath(p), shopRoot).href)}">${escape(p.name)}</a><br>${money(p.price)}${p.availability === 'out' ? '<br>Немає в наявності' : ''}</div></div>
+<label>Кількість<input type="number" min="1" max="99" step="1" value="${p.quantity}" data-quantity="${escape(p.id)}"></label>
+<button class="button secondary" data-remove="${escape(p.id)}">Видалити</button></article>`).join('') + missing.map(id =>
+    '<article class="line-item">Товар більше не представлено в каталозі <button class="button secondary" data-remove="' +
+    escape(id) + '">Видалити</button></article>').join('');
+  if (!lines.length && !missing.length) list.innerHTML = '<p>Ваш кошик порожній. <a href="../katalog/">Перейти до каталогу</a></p>';
+  total.textContent = lines.length ? 'Разом за товари: ' + money(totalPrice) : '';
+  form.hidden = !lines.length || !!missing.length || lines.some(p => p.availability === 'out');
+}
+
+function localDigits(value) {
+  const digits = value.replace(/\D/g, '');
+  if (value.startsWith('+')) return digits.startsWith('380') ? digits.slice(3, 12) : '';
+  if (digits.startsWith('380') && digits.length > 9) return digits.slice(3, 12);
+  return (digits.startsWith('0') ? digits.slice(1) : digits).slice(0, 9);
+}
+
+if (form) {
+  renderOrder().catch(() => { list.textContent = 'Не вдалося завантажити кошик.'; });
+  list.addEventListener('change', async event => {
+    const id = event.target.dataset.quantity;
+    if (!id || pending) return;
+    const value = event.target.valueAsNumber;
+    if (Number.isInteger(value) && value >= 1 && value <= 99) {
+      cart = { ...cart, [id]: value };
+      saveCart();
+    }
+    await renderOrder();
+  });
+  list.addEventListener('click', async event => {
+    const id = event.target.closest('[data-remove]')?.dataset.remove;
+    if (!id || pending) return;
+    delete cart[id];
+    saveCart();
+    await renderOrder();
+  });
+  const phone = form.elements.phone;
+  phone.addEventListener('input', () => {
+    const digits = localDigits(phone.value);
+    phone.value = digits ? '+380 (' + digits.slice(0, 2) +
+      (digits.length >= 2 ? ') ' + digits.slice(2, 5) : '') +
+      (digits.length > 5 ? '-' + digits.slice(5, 7) : '') +
+      (digits.length > 7 ? '-' + digits.slice(7, 9) : '') : '';
+    phone.setCustomValidity('');
+  });
+  phone.addEventListener('keydown', event => {
+    if (event.key !== 'Backspace' || phone.selectionStart !== phone.value.length || phone.selectionStart !== phone.selectionEnd ||
+      /\d$/.test(phone.value) || !phone.value) return;
+    event.preventDefault();
+    phone.value = phone.value.replace(/[\s)-]+$/, '').slice(0, -1);
+    phone.dispatchEvent(new Event('input'));
+  });
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (pending) return;
+    const fields = Object.fromEntries([...new FormData(form)].map(([key, value]) => [key, value.trim()]));
+    const digits = localDigits(fields.phone);
+    if (digits.length !== 9) {
+      phone.setCustomValidity('Введіть 9 цифр після +380.');
+      phone.reportValidity();
+      return;
+    }
+    if (![fields.name, fields.city, fields.branch].every(Boolean)) {
+      result.textContent = 'Заповніть ім’я, місто та відділення.';
+      result.focus();
+      return;
+    }
+    const submit = form.querySelector('button');
+    pending = true;
+    submit.disabled = true;
+    try {
+      const lines = await getLines();
+      if (!lines.length || lines.length !== Object.keys(cart).length || lines.some(p => p.availability === 'out')) {
+        throw new Error('Кошик змінився');
+      }
+      const response = await config.submitOrder({ ...fields, phone: '+380' + digits,
+        items: lines.map(({ id, name, quantity, price }) => ({ id, name, quantity, price })) });
+      for (const { id, quantity } of lines) {
+        const remaining = (cart[id] ?? 0) - quantity;
+        if (remaining > 0) cart[id] = remaining;
+        else delete cart[id];
+      }
+      saveCart();
+      form.reset();
+      await renderOrder();
+      result.textContent = response.message;
+    } catch {
+      result.textContent = 'Не вдалося оформити замовлення. Перевірте кошик і спробуйте ще раз.';
+    } finally {
+      pending = false;
+      submit.disabled = false;
+      result.focus();
+    }
+  });
+}
