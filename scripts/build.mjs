@@ -358,6 +358,31 @@ for (const [family, weights] of [['playfair-display', [700]], ['onest', [400, 50
 await cp('config.mjs', 'dist/config.mjs');
 await mkdir('dist/media/products', { recursive: true });
 await cp('assets/brand', 'dist/' + brandPath, { recursive: true });
+// Keep the Google Search favicon at a stable site-root URL. ICO stores PNG frames
+// so the 16, 32, and 48 pixel images retain their full color and transparency.
+const icoFrames = await Promise.all([16, 32, 48].map(async size => ({
+  size,
+  data: await sharp('assets/brand/icon-192.png').resize(size, size).png().toBuffer()
+})));
+const ico = Buffer.alloc(6 + icoFrames.length * 16 + icoFrames.reduce((sum, frame) => sum + frame.data.length, 0));
+ico.writeUInt16LE(0, 0);
+ico.writeUInt16LE(1, 2);
+ico.writeUInt16LE(icoFrames.length, 4);
+let icoOffset = 6 + icoFrames.length * 16;
+icoFrames.forEach(({ size, data }, index) => {
+  const entry = 6 + index * 16;
+  ico[entry] = size === 256 ? 0 : size;
+  ico[entry + 1] = size === 256 ? 0 : size;
+  ico[entry + 2] = 0;
+  ico[entry + 3] = 0;
+  ico.writeUInt16LE(1, entry + 4);
+  ico.writeUInt16LE(32, entry + 6);
+  ico.writeUInt32LE(data.length, entry + 8);
+  ico.writeUInt32LE(icoOffset, entry + 12);
+  data.copy(ico, icoOffset);
+  icoOffset += data.length;
+});
+await writeFile('dist/favicon.ico', ico);
 await mkdir('dist/assets/textures', { recursive: true });
 for (const file of ['frost.webp', 'ice-crushed.webp', 'tin-brushed.webp', 'roe-outline.svg']) {
   await cp('assets/textures/' + file, 'dist/assets/textures/' + file);
@@ -393,9 +418,10 @@ for (const [path, page] of pages) {
 <title>${title}</title><meta name="description" content="${description}">
 <meta property="og:site_name" content="${e(config.siteName)}">
 <meta name="theme-color" content="#2a1a14">
-<link rel="icon" type="image/png" sizes="32x32" href="${brand}favicon-32.png">
-<link rel="icon" type="image/svg+xml" href="${brand}favicon.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="${brand}apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/${brandPath}icon-96.png" type="image/png" sizes="96x96">
+<link rel="icon" href="/${brandPath}favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/${brandPath}apple-touch-icon.png">
 <link rel="manifest" href="${e(prefix)}site.webmanifest">
 ${page.noindex ? '<meta name="robots" content="noindex">' : ''}
 ${base ? '<link rel="canonical" href="' + e(absolute(path)) + '"><meta property="og:url" content="' + e(absolute(path)) + '">' : ''}
