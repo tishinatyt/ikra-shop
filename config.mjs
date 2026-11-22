@@ -1,5 +1,6 @@
 export const config = {
-  name: 'Золоте зерно',
+  siteName: 'Золоте зерно. Червона ікра',
+  shortName: 'Золоте зерно',
   siteUrl: 'https://ikra.fun',
   phone: '+380636002006',
   phoneDisplay: '+38 063 600 20 06',

@@ -36,7 +36,7 @@ const schema = (type, fields) => ({ '@context': 'https://schema.org', '@type': t
 const json = value => JSON.stringify(value).replace(/</g, '\\u003c');
 const pages = new Map();
 const brandPath = 'media/brand/';
-const brandAlt = 'Золоте зерно — червона ікра';
+const brandAlt = config.siteName;
 const organizationLogo = brandPath + 'icon-512.png';
 const producerPath = 'pro-vyrobnyka/';
 const warrantyPath = 'harantiia/';
@@ -56,7 +56,7 @@ const faq = [
   ['Як доставляють охолоджену ікру?', 'І в Чернігові, і під час відправлення по Україні використовуємо термоупаковку. Після отримання помістіть ікру в холодильник. Якщо замовлення їде Новою поштою, заберіть його з відділення якнайшвидше.']
 ];
 const organization = schema('Store', {
-  name: config.name, ...(base && { url: base.href }), ...(config.phone && { telephone: config.phone }),
+  name: config.siteName, ...(base && { url: base.href }), ...(config.phone && { telephone: config.phone }),
   areaServed: [{ '@type': 'City', name: 'Чернігів' }, { '@type': 'Country', name: 'Україна' }],
   ...(config.address && { address: config.address }),
   ...(config.telegram && { sameAs: [config.telegram] })
@@ -117,8 +117,11 @@ function crumb(prefix, entries) {
 const breadcrumbSchema = entries => schema('BreadcrumbList', { itemListElement: entries.map(([path, name], i) => ({
   '@type': 'ListItem', position: i + 1, name, ...(base && { item: absolute(path) })
 })) });
-const entry = (path, title, description, body, structured = [], options = {}) =>
+const entry = (path, subject, description, body, structured = [], options = {}) => {
+  const fullTitle = subject + ' | ' + config.siteName;
+  const title = fullTitle.length <= 60 ? fullTitle : subject + ' | ' + config.shortName;
   pages.set(path, { title, description, body, structured, ...options });
+};
 
 const home = [['', 'Головна']];
 const catalog = [...home, ['katalog/', 'Каталог']];
@@ -131,7 +134,7 @@ const setCards = prefix => sets.map(set => '<article class="card">' + image(set.
   '<div class="card-info"><h3>' + e(set.name) + '</h3><ul>' + set.items.map(p => '<li>' +
   link(prefix, productPath(p), p.name) + '</li>').join('') + '</ul><div class="card-buy"><strong>' +
   money(set.price) + '</strong>' + add(set.id, true, 'set') + '</div></div></article>').join('');
-entry('', 'Червона ікра в Чернігові з доставкою | Золоте зерно', 'Купити червону ікру в Чернігові з доставкою в день замовлення. Ікра форелі, горбуші, кети та подарункові набори. По Україні відправляємо Новою поштою.', `
+entry('', 'Червона ікра в Чернігові з доставкою', 'Купити червону ікру в Чернігові з доставкою в день замовлення. Ікра форелі, горбуші, кети та подарункові набори. По Україні відправляємо Новою поштою.', `
 <section class="hero"><canvas id="roe" aria-hidden="true"></canvas><div class="lid"><div class="lid-inner">
 <h1>${homeTitle}</h1><p class="lead">${deliverySummary}</p>
 <div class="hero-actions"><a class="button primary" href="katalog/">Перейти до каталогу</a><a href="#delivery">Умови доставки</a></div>
@@ -161,9 +164,9 @@ const certificateContent = certificates.some(([, file]) => file) ?
       '<div class="certificate-placeholder">Скан документа готується</div>') + '</figure>').join('') + '</div>' :
   '<ul class="standards">' + standards.map(([name]) => '<li>' + e(name) + '</li>').join('') + '</ul>';
 
-entry(producerPath, 'Про виробника Рибкопродукт | Золоте зерно', 'Дізнайтеся про українського виробника ікри Рибкопродукт, його торгові марки, походження сировини, сертифікати та контроль якості під час виробництва.', `
+entry(producerPath, 'Про виробника Рибкопродукт', 'Дізнайтеся про українського виробника ікри Рибкопродукт, його торгові марки, походження сировини, сертифікати та контроль якості під час виробництва.', `
 <article class="slab info-page">${crumb('../', producer)}<h1>Про виробника</h1>
-<p class="intro">Ми — продавець продукції виробника РКП у Чернігові.</p>
+<p class="intro">Ми — магазин «${e(config.siteName)}», продавець продукції виробника РКП у Чернігові.</p>
 <p>«Рибкопродукт» працює на українському ринку з 2008 року. Компанія позиціонує себе як найбільший виробник червоної ікри в Україні. За даними РКП, асортимент налічує близько 60 найменувань під більш ніж 10 торговими марками. Серед них — «Червоне Золото», «Золота Унція» та «Острів».</p>
 <section><h2>Походження та контроль якості</h2>
 <p>РКП використовує сировину з Аляски та Скандинавії. За інформацією виробника, на виробництві застосовують озонування для підтримання стерильності, а під час перевезення контролюють температуру, щоб зберегти холодовий ланцюг.</p></section>
@@ -172,10 +175,11 @@ entry(producerPath, 'Про виробника Рибкопродукт | Зол
 ${certificateContent}</section>
 </article>`, [breadcrumbSchema(producer)], { query: 'виробник ікри Рибкопродукт' });
 
-entry(warrantyPath, 'Гарантія натуральності ікри | Золоте зерно', 'Умови гарантії натуральності ікри в магазині «Золоте зерно»: коли звертатися, як провести незалежну експертизу та в який строк повертаємо кошти.', `
+entry(warrantyPath, 'Гарантія натуральності ікри', 'Умови гарантії натуральності ікри в магазині «' + config.siteName + '»: коли звертатися, як провести незалежну експертизу та в який строк повертаємо кошти.', `
 <article class="slab info-page">${crumb('../', warranty)}<h1>Умови гарантії натуральності</h1>
 <p class="intro">${warrantyPromise}</p>
 <section><h2>Як скористатися гарантією</h2>
+<p>Гарантія поширюється на ікру, придбану в магазині «${e(config.siteName)}».</p>
 <ol class="warranty-steps">
 <li>Збережіть банку з етикеткою та номер замовлення.</li>
 <li>Зверніться до нас протягом 14 днів із дня отримання замовлення.</li>
@@ -189,7 +193,7 @@ function filter(name, label, values, display) {
 }
 const values = key => [...new Set(products.map(p => p[key]))].sort((a, b) =>
   typeof a === 'number' ? a - b : a.localeCompare(b, 'uk'));
-entry('katalog/', 'Каталог червоної ікри в Чернігові | Золоте зерно', 'Порівняйте ціни на ікру форелі, горбуші, кети, нерки, кижуча, чавичі та щуки. Фільтруйте за вагою й маркою та замовляйте доставку в Чернігові або по Україні.', `
+entry('katalog/', 'Каталог червоної ікри в Чернігові', 'Порівняйте ціни на ікру форелі, горбуші, кети, нерки, кижуча, чавичі та щуки. Фільтруйте за вагою й маркою та замовляйте доставку в Чернігові або по Україні.', `
 <div class="slab">${crumb('../', catalog)}<h1>Каталог червоної ікри</h1>${varietyLinks('../')}
 <form id="filters" class="filters" ${products.length ? '' : 'hidden'}>
 ${filter('species', 'Вид ікри', values('species'), v => species[v])}
@@ -214,9 +218,9 @@ const deliveryFaq = [
   ['У які райони Чернігова доставляєте?', 'Доставляємо в Деснянський і Новозаводський райони. Під час підтвердження уточнюємо адресу й час.'],
   ['Як відправляєте замовлення по Україні?', 'Відправляємо Новою поштою в термоупаковці. Узгодьте день відправлення та заберіть посилку після прибуття.']
 ];
-entry(deliveryPath, deliveryTitle + ' | Золоте зерно', 'Доставка ікри в Деснянський і Новозаводський райони Чернігова в день замовлення. Дізнайтеся, як пакуємо ікру та відправляємо її Новою поштою по Україні.', `
+entry(deliveryPath, deliveryTitle, 'Доставка ікри в Деснянський і Новозаводський райони Чернігова в день замовлення. Дізнайтеся, як пакуємо ікру та відправляємо її Новою поштою по Україні.', `
 <article class="slab info-page">${crumb('../', deliveryCrumbs)}<h1>${deliveryTitle}</h1>
-<p class="intro">Доставляємо ікру в Деснянський і Новозаводський райони Чернігова в день замовлення.</p>
+<p class="intro">Магазин «${e(config.siteName)}» доставляє ікру в Деснянський і Новозаводський райони Чернігова в день замовлення.</p>
 <p>${e(config.localDeliveryTerms)}</p>
 <section><h2>Як зберігаємо холод</h2><p>Пакуємо охолоджену ікру в термоупаковку, яка допомагає зберігати холод під час перевезення. Після отримання поставте банку в холодильник і орієнтуйтеся на температуру з етикетки.</p></section>
 <section><h2>Замовлення по Україні</h2><p>Відправляємо Новою поштою. Під час підтвердження замовлення узгоджуємо день відправлення. За можливості заберіть посилку одразу після прибуття.</p></section>
@@ -226,7 +230,7 @@ entry(deliveryPath, deliveryTitle + ' | Золоте зерно', 'Достав�
 
 const seasonTitle = 'Ікра на Новий рік у Чернігові';
 const seasonCrumbs = [...home, [seasonPath, seasonTitle]];
-entry(seasonPath, seasonTitle + ' | Золоте зерно', 'Оберіть ікру на Новий рік у Чернігові: популярні фасування, подарункові набори й ідеї для закусок. Дізнайтеся, коли оформити замовлення до свят.', `
+entry(seasonPath, seasonTitle, 'Оберіть ікру на Новий рік у Чернігові: популярні фасування, подарункові набори й ідеї для закусок. Дізнайтеся, коли оформити замовлення до свят.', `
 <article class="slab info-page">${crumb('../', seasonCrumbs)}<h1>${seasonTitle}</h1>
 <p>Для святкового столу зручно поєднати кілька видів ікри, а для подарунка — обрати готовий набір. Подавайте ікру на канапках, у тарталетках або окремо для дегустації.</p>
 <h2>Коли замовити до свят</h2><p>${config.newYearOrderDeadline ?
@@ -248,7 +252,7 @@ for (const [key, [, name, paragraphs, serving]] of Object.entries(varieties)) {
     'Замовляйте доставку по місту в день замовлення.', 'Доставка по Україні Новою поштою.',
     'Порівняйте доступні фасування.', 'Є доставка по місту.'
   ]);
-  entry(path, heading + ' — ціни | Золоте зерно', description, `
+  entry(path, heading + ' — ціни', description, `
 <article class="slab info-page">${crumb('../', entries)}<h1>${heading}</h1>
 ${paragraphs.map(p => '<p>' + e(p) + '</p>').join('')}</article>
 <section class="slab"><h2>Фасування та ціни</h2><div class="grid">${grid(selected, '../')}</div></section>
@@ -286,7 +290,7 @@ for (const p of products) {
     query: 'ікра ' + variety + ' ' + p.brand + ' ' + p.weight + ' г ' + pack + ' Чернігів' });
 }
 
-entry('koshyk/', 'Кошик і оформлення замовлення | Золоте зерно', 'Перевірте вибрані товари та їхню кількість, залиште контактні дані й оформіть замовлення ікри. Тут можна переглянути загальну вартість перед підтвердженням.', `
+entry('koshyk/', 'Кошик і оформлення замовлення', 'Перевірте вибрані товари та їхню кількість, залиште контактні дані й оформіть замовлення ікри. Тут можна переглянути загальну вартість перед підтвердженням.', `
 <div class="slab">${crumb('../', basket)}<h1>Кошик</h1>${contactLinks()}<noscript><p>Увімкніть JavaScript, щоб оформити замовлення.</p></noscript>
 <p id="order-result" role="status" tabindex="-1"></p>
 <div id="order-fallback" class="contact-links" hidden>
@@ -315,7 +319,7 @@ ${config.viber ? '<a class="button secondary" href="' + e(config.viber) + '">Н�
 <button class="button primary">Підтвердити замовлення</button></form></div></div>`, [breadcrumbSchema(basket)], { noindex: true, query: 'оформлення замовлення ікри' });
 
 const missing = [...home, ['404.html', 'Сторінку не знайдено']];
-entry('404.html', 'Сторінку не знайдено | Золоте зерно', 'Ця сторінка недоступна. Відкрийте каталог «Золоте зерно», щоб знайти потрібний вид ікри, переглянути ціни й фасування або повернутися на головну сторінку.', '<div class="slab">' + crumb(absolute(''), missing) + '<h1>Сторінку не знайдено</h1><p>Перейдіть на головну або відкрийте каталог.</p><a class="button" href="' + e(absolute('katalog/')) + '">До каталогу</a></div>', [breadcrumbSchema(missing)], { noindex: true, query: '—' });
+entry('404.html', 'Сторінку не знайдено', 'Ця сторінка недоступна. Відкрийте каталог магазину «' + config.siteName + '», щоб знайти потрібний вид ікри та переглянути доступні ціни й фасування.', '<div class="slab">' + crumb(absolute(''), missing) + '<h1>Сторінку не знайдено</h1><p>Перейдіть на головну або відкрийте каталог.</p><a class="button" href="' + e(absolute('katalog/')) + '">До каталогу</a></div>', [breadcrumbSchema(missing)], { noindex: true, query: '—' });
 
 const seoRows = [];
 const badLengths = [];
@@ -359,8 +363,8 @@ for (const file of ['frost.webp', 'ice-crushed.webp', 'tin-brushed.webp', 'roe-o
   await cp('assets/textures/' + file, 'dist/assets/textures/' + file);
 }
 await writeFile('dist/site.webmanifest', JSON.stringify({
-  name: config.name,
-  short_name: config.name,
+  name: config.siteName,
+  short_name: config.shortName,
   icons: [192, 512].map(size => ({
     src: brandPath + 'icon-' + size + '.png', sizes: size + 'x' + size, type: 'image/png'
   })),
@@ -387,6 +391,7 @@ for (const [path, page] of pages) {
   await mkdir('dist/' + output.slice(0, output.lastIndexOf('/') + 1), { recursive: true });
   await writeFile('dist/' + output, `<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${title}</title><meta name="description" content="${description}">
+<meta property="og:site_name" content="${e(config.siteName)}">
 <meta name="theme-color" content="#2a1a14">
 <link rel="icon" type="image/png" sizes="32x32" href="${brand}favicon-32.png">
 <link rel="icon" type="image/svg+xml" href="${brand}favicon.svg">
@@ -400,7 +405,7 @@ ${base ? '<link rel="canonical" href="' + e(absolute(path)) + '"><meta property=
 ${path === '' ? '<script defer src="assets/js/roe.js"></script>' : ''}
 <script type="application/ld+json">${json([{ ...organization, logo: base ? absolute(organizationLogo) : prefix + organizationLogo }, ...page.structured])}</script></head><body>
 <a class="skip" href="#main">До вмісту</a><header><div class="wrap header"><a class="wordmark" href="${e(prefix || './')}">${logo('logo-compact.svg')}</a><nav aria-label="Головна навігація">${link(prefix, 'katalog/', 'Каталог')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, producerPath, 'Про виробника')}</nav>${headerPhone}<a class="basket" href="${e(prefix)}koshyk/">Кошик <span id="cart-count">0</span></a></div></header>
-<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}</nav>${contactLinks()}<nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav></div></footer><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
+<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}</nav>${contactLinks()}<nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav><small>© 2026 ${e(config.siteName)}</small></div></footer><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
 }
 const indexable = [...pages].filter(([, page]) => !page.noindex);
 await writeFile('dist/sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
@@ -411,7 +416,7 @@ await writeFile('dist/.nojekyll', '');
 if (process.argv.includes('--seo-report')) {
   const cells = row => '| ' + row.map(cell => cell.replaceAll('|', '\\|')).join(' | ') + ' |';
   await writeFile('docs/seo.md', [
-    '# SEO-карта ikra.fun', '', 'Мова сайту — українська. Основний ринок — Чернігів.', '',
+    '# SEO-карта ikra.fun', '', 'Бренд: «' + config.siteName + '». Мова сайту — українська. Основний ринок — Чернігів.', '',
     'Кошик і сторінка 404 закриті для індексації.', '',
     cells(['Сторінка', 'Основний запит', 'Title', 'Description', 'H1']),
     '| --- | --- | --- | --- | --- |',
