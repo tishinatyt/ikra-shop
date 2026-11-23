@@ -8,6 +8,26 @@ const origins = new Set(['https://ikra.fun', 'https://www.ikra.fun', 'https://ti
 const fields = { name: 80, phone: 32, address: 180, city: 100, npBranch: 120, time: 60, comment: 400 };
 const maxBodyBytes = 16_384;
 const limits = { windowMs: 600_000, maxPosts: 5, maxIps: 10_000 };
+const shippingThresholdGrams = 1000;
+const productCatalog: Record<string, { grams: number; availability: 'in_stock' | 'preorder' }> = {
+  'rkp-1-03': { grams: 500, availability: 'preorder' }, 'rkp-1-06': { grams: 190, availability: 'preorder' },
+  'rkp-1-01': { grams: 500, availability: 'in_stock' },
+  'rkp-1-10': { grams: 500, availability: 'preorder' }, 'rkp-1-12': { grams: 250, availability: 'preorder' },
+  'rkp-1-13': { grams: 200, availability: 'in_stock' }, 'rkp-1-14': { grams: 100, availability: 'preorder' },
+  'rkp-1-16': { grams: 500, availability: 'in_stock' }, 'rkp-1-17': { grams: 250, availability: 'preorder' },
+  'rkp-1-18': { grams: 200, availability: 'in_stock' }, 'rkp-1-19': { grams: 100, availability: 'preorder' },
+  'rkp-1-22': { grams: 500, availability: 'preorder' }, 'rkp-1-24': { grams: 250, availability: 'preorder' },
+  'rkp-1-25': { grams: 200, availability: 'in_stock' }, 'rkp-1-26': { grams: 100, availability: 'preorder' },
+  'rkp-1-28': { grams: 500, availability: 'preorder' }, 'rkp-1-29': { grams: 250, availability: 'preorder' },
+  'rkp-1-30': { grams: 200, availability: 'preorder' }, 'rkp-1-31': { grams: 100, availability: 'preorder' },
+  'rkp-1-32': { grams: 500, availability: 'preorder' }, 'rkp-1-33': { grams: 250, availability: 'preorder' },
+  'rkp-1-34': { grams: 200, availability: 'preorder' }, 'rkp-1-35': { grams: 100, availability: 'preorder' },
+  'rkp-1-36': { grams: 500, availability: 'preorder' }, 'rkp-1-37': { grams: 250, availability: 'preorder' },
+  'rkp-1-38': { grams: 200, availability: 'preorder' }, 'rkp-1-39': { grams: 100, availability: 'preorder' },
+  'rkp-2-05': { grams: 190, availability: 'preorder' }, 'rkp-2-06': { grams: 100, availability: 'preorder' },
+  'rkp-2-07': { grams: 100, availability: 'preorder' }, 'rkp-2-15': { grams: 120, availability: 'preorder' },
+  'rkp-2-17': { grams: 100, availability: 'preorder' }, 'rkp-2-18': { grams: 230, availability: 'preorder' }
+};
 const kyiv = 'Europe/Kyiv';
 const stamp = new Intl.DateTimeFormat('uk-UA', { timeZone: kyiv, dateStyle: 'short', timeStyle: 'short' });
 const numberDate = new Intl.DateTimeFormat('en-GB', { timeZone: kyiv, day: '2-digit', month: '2-digit' });
@@ -52,21 +72,24 @@ function validate(data: Record<string, unknown>) {
   if (!clean.name) return invalid('missing name');
   if (!phone) return invalid('invalid phone format');
   const delivery = data.delivery;
-  if (delivery !== 'chernihiv' && delivery !== 'novaposhta') return invalid('invalid delivery method');
+  if (delivery !== 'pickup' && delivery !== 'chernihiv' && delivery !== 'novaposhta') return invalid('invalid delivery method');
   if (delivery === 'chernihiv' && !clean.address) return invalid('missing local address');
   if (delivery === 'novaposhta' && (!clean.city || !clean.npBranch)) return invalid('missing city or branch');
   if (!Array.isArray(data.items) || data.items.length < 1 || data.items.length > 30) {
     return invalid('invalid item count', 'INVALID_CART');
   }
-  const items: { id: string; title: string; qty: number; subtotal: number }[] = [];
+  const items: { id: string; title: string; qty: number; grams: number; availability: 'in_stock' | 'preorder'; subtotal: number }[] = [];
   const seen = new Set<string>();
+  let totalGrams = 0;
   for (const item of data.items) {
     if (!isObject(item)) return invalid('invalid item shape', 'INVALID_CART');
-    const { id, title, qty } = item;
+    const { id, title, qty, grams } = item;
     const price = cents(item.price, 1_000_000);
-    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(id) || seen.has(id)) {
+    if (typeof id !== 'string' || !Object.hasOwn(productCatalog, id) || seen.has(id)) {
       return invalid('invalid or duplicate item id', 'INVALID_CART');
     }
+    const catalogProduct = productCatalog[id];
+    if (typeof grams !== 'number' || grams !== catalogProduct.grams) return invalid('item weight does not match product', 'INVALID_CART');
     if (typeof title !== 'string' || !title.trim() || title.length > 80 || /[\x00-\x1f\x7f]/.test(title)) {
       return invalid('invalid item title', 'INVALID_CART');
     }
@@ -74,12 +97,14 @@ function validate(data: Record<string, unknown>) {
       return invalid('invalid item quantity', 'INVALID_CART');
     }
     if (price === null) return invalid('invalid item price', 'INVALID_CART');
-    items.push({ id, title: title.trim(), qty, subtotal: qty * price });
+    items.push({ id, title: title.trim(), qty, grams, availability: catalogProduct.availability, subtotal: qty * price });
+    totalGrams += grams * qty;
     seen.add(id);
   }
+  if (delivery !== 'pickup' && totalGrams < shippingThresholdGrams) return invalid('delivery requires at least 1000 g', 'INVALID_CART');
   const total = items.reduce((sum, item) => sum + item.subtotal, 0);
   if (cents(data.total, 1_500_000_000) !== total) return invalid('total does not match items', 'INVALID_CART');
-  return { ...clean, phone, delivery, items, total };
+  return { ...clean, phone, delivery, items, total, totalGrams };
 }
 
 export function createHandler({ env, send = fetch, now = () => new Date() }: Dependencies) {
@@ -148,17 +173,23 @@ export function createHandler({ env, send = fetch, now = () => new Date() }: Dep
     if (!token || !chatId) return reject(503, 'Order service unavailable', 'Telegram configuration missing');
     const digits = crypto.getRandomValues(new Uint32Array(1))[0] % 10_000;
     const number = 'ZZ-' + numberDate.format(date).replace('/', '') + '-' + String(digits).padStart(4, '0');
-    const address = order.delivery === 'chernihiv'
-      ? 'Чернігів, ' + order.address
-      : 'Нова пошта, ' + order.city + ', відділення ' + order.npBranch;
+    const address = order.delivery === 'pickup'
+      ? 'Самовивіз: Чернігів, вул. Мстиславська, 67, щодня 9:00–20:00'
+      : order.delivery === 'chernihiv'
+        ? 'Кур’єр по Чернігову: ' + order.address
+        : 'Нова Пошта, ' + order.city + ', відділення ' + order.npBranch;
+    const payment = order.delivery === 'pickup' ? 'Оплата при отриманні' : 'Передоплата на картку';
     const text = [
       '<b>Нове замовлення №' + number + '</b>', '',
       '<b>Ім’я:</b> ' + escape(order.name),
       '<b>Телефон:</b> ' + order.phone,
       '<b>Доставка:</b> ' + escape(address),
+      '<b>Оплата:</b> ' + payment,
       '<b>Бажаний час:</b> ' + escape(order.time || 'Не вказано'), '',
-      ...order.items.map(item => escape(item.title) + ' × ' + item.qty + ' = ' + money.format(item.subtotal / 100)),
-      '', '<b>Разом:</b> ' + money.format(order.total / 100),
+      ...order.items.map(item => escape(item.title) + ' × ' + item.qty + ' (' + item.grams * item.qty + ' г; ' +
+        (item.availability === 'in_stock' ? 'В наявності' : 'Під замовлення') + ') = ' + money.format(item.subtotal / 100)),
+      '', '<b>Вага:</b> ' + order.totalGrams + ' г',
+      '<b>Разом:</b> ' + money.format(order.total / 100),
       '<b>Коментар:</b> ' + escape(order.comment || 'Не вказано'),
       '<b>Час замовлення (Київ):</b> ' + stamp.format(date)
     ].join('\n');

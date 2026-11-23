@@ -7,11 +7,16 @@ export const config = {
   telegram: 'https://t.me/+380636002006',
   viber: 'viber://chat?number=%2B380636002006',
   orderFunctionUrl: 'https://pqasdmiqnlyyjwmmqeyc.supabase.co/functions/v1/ikra-order',
-  localDeliveryTerms: 'Час і вартість доставки узгоджуємо під час підтвердження замовлення.',
+  pickupAddress: 'Чернігів, вул. Мстиславська, 67',
+  pickupHours: 'Щодня 9:00–20:00',
+  localDeliveryTerms: 'Самовивіз: Чернігів, вул. Мстиславська, 67, щодня 9:00–20:00, оплата при отриманні. Кур’єр по Чернігову та Нова Пошта по Україні — безкоштовно від 1000 г продукції; передоплата на картку, реквізити надішлемо після підтвердження.',
+  address: { '@type': 'PostalAddress', streetAddress: 'вул. Мстиславська, 67', addressLocality: 'Чернігів', addressCountry: 'UA' },
+  openingHours: 'Mo-Su 09:00-20:00',
+  shippingThresholdGrams: 1000,
   newYearPromotionUntil: '2027-01-10',
   newYearOrderDeadline: '',
   seoLastModified: '2026-11-21',
-  paymentMethods: [{ id: 'upon-delivery', label: 'Оплата при отриманні (уточнюється)' }],
+  paymentMethods: [{ id: 'pickup', label: 'Самовивіз — оплата при отриманні' }, { id: 'delivery-card', label: 'Доставка — передоплата на картку після підтвердження' }],
   async submitOrder(order) {
     const failure = code => Object.assign(new Error('Замовлення не підтверджено'), { code });
     let response;

@@ -158,8 +158,11 @@ if (filters && !filters.hidden) {
 const form = document.querySelector('#order');
 const list = document.querySelector('#cart-items');
 const total = document.querySelector('#cart-total');
+const shippingHint = document.querySelector('#shipping-hint');
+const shippingProgress = document.querySelector('#shipping-progress');
 const result = document.querySelector('#order-result');
 const orderFallback = document.querySelector('#order-fallback');
+let updateDeliveryOptions = () => {};
 
 async function getLines() {
   return (await getProducts()).filter(p => Object.hasOwn(cart, p.id)).map(p => ({ ...p, quantity: cart[p.id] }));
@@ -179,14 +182,24 @@ async function renderOrder() {
   const lines = await getLines();
   const missing = Object.keys(cart).filter(id => !lines.some(p => p.id === id));
   const totalPrice = orderTotal(lines);
-  list.innerHTML = lines.map(p => `<article class="line-item"><div class="line-item-product">${cartThumbnail(p)}<div><a href="${escape(new URL(productPath(p), shopRoot).href)}">${escape(p.name)}</a><br>${money(p.price)}${p.availability === 'out' ? '<br>Немає в наявності' : ''}</div></div>
+  const grams = lines.reduce((sum, product) => sum + product.weight * product.quantity, 0);
+  list.innerHTML = lines.map(p => `<article class="line-item"><div class="line-item-product">${cartThumbnail(p)}<div><a href="${escape(new URL(productPath(p), shopRoot).href)}">${escape(p.name)}</a><br>${money(p.price)}<br><span class="stock ${p.availability === 'in_stock' ? 'in-stock' : 'preorder'}">${p.availability === 'in_stock' ? 'В наявності' : 'Під замовлення — термін уточнимо під час підтвердження'}</span></div></div>
 <label>Кількість<input type="number" min="1" max="${maxOrderQty}" step="1" value="${p.quantity}" data-quantity="${escape(p.id)}"></label>
 <button class="button secondary" data-remove="${escape(p.id)}">Видалити</button></article>`).join('') + missing.map(id =>
     '<article class="line-item">Товар більше не представлено в каталозі <button class="button secondary" data-remove="' +
     escape(id) + '">Видалити</button></article>').join('');
   if (!lines.length && !missing.length) list.innerHTML = '<p>Ваш кошик порожній. <a href="../katalog/">Перейти до каталогу</a></p>';
-  total.textContent = lines.length ? 'Разом за товари: ' + money(totalPrice) : '';
-  form.hidden = !lines.length || !!missing.length || lines.some(p => p.availability === 'out');
+  total.textContent = lines.length ? 'Разом за товари: ' + money(totalPrice) + ' · Вага: ' + grams + ' г' : '';
+  if (shippingHint && shippingProgress) {
+    const threshold = config.shippingThresholdGrams;
+    shippingProgress.setAttribute('aria-valuenow', String(Math.min(grams, threshold)));
+    shippingProgress.firstElementChild.style.width = Math.min(100, grams / threshold * 100) + '%';
+    shippingHint.textContent = grams < threshold
+      ? 'Додайте ще ' + (threshold - grams) + ' г — і доставка буде безкоштовною (кур’єр по Чернігову або Нова Пошта). Самовивіз доступний завжди.'
+      : 'Вага для безкоштовної доставки досягнута. Кур’єр по Чернігову або Нова Пошта — безкоштовно.';
+  }
+  updateDeliveryOptions(grams);
+  form.hidden = !lines.length || !!missing.length;
 }
 
 function localDigits(value) {
@@ -199,13 +212,29 @@ function localDigits(value) {
 if (form) {
   const delivery = form.elements.namedItem('delivery');
   const deliveryFields = [...form.querySelectorAll('[data-delivery]')];
+  const shippingOptions = [...delivery.querySelectorAll('[data-paid-delivery]')];
+  const paymentHint = document.querySelector('#payment-hint');
+  let cartGrams = 0;
+  function updatePaymentHint() {
+    paymentHint.textContent = delivery.value === 'pickup'
+      ? 'Оплата при отриманні під час самовивозу.'
+      : 'Передоплата на картку. Реквізити надішлемо після підтвердження замовлення.';
+  }
   function updateDelivery() {
     for (const fieldset of deliveryFields) {
       const inactive = fieldset.dataset.delivery !== delivery.value;
-      fieldset.disabled = inactive;
+      if ('disabled' in fieldset) fieldset.disabled = inactive;
       fieldset.hidden = inactive;
     }
+    updatePaymentHint();
   }
+  updateDeliveryOptions = grams => {
+    cartGrams = grams;
+    const allowed = grams >= config.shippingThresholdGrams;
+    for (const option of shippingOptions) option.disabled = !allowed;
+    if (!allowed && delivery.value !== 'pickup') delivery.value = 'pickup';
+    updateDelivery();
+  };
   updateDelivery();
   delivery.addEventListener('change', updateDelivery);
   renderOrder().catch(() => { list.textContent = 'Не вдалося завантажити кошик.'; });
@@ -254,8 +283,8 @@ if (form) {
       phone.reportValidity();
       return;
     }
-    const required = fields.delivery === 'chernihiv' ? [fields.name, fields.address] :
-      [fields.name, fields.city, fields.npBranch];
+    const required = fields.delivery === 'pickup' ? [fields.name] : fields.delivery === 'chernihiv'
+      ? [fields.name, fields.address] : [fields.name, fields.city, fields.npBranch];
     if (!required.every(Boolean)) {
       result.textContent = 'Заповніть ім’я та дані для вибраного способу доставки.';
       result.focus();
@@ -266,7 +295,7 @@ if (form) {
     submit.disabled = true;
     try {
       const lines = await getLines();
-      if (!lines.length || lines.length !== Object.keys(cart).length || lines.some(p => p.availability === 'out')) {
+      if (!lines.length || lines.length !== Object.keys(cart).length) {
         throw new Error('Кошик змінився');
       }
       if (lines.length > maxOrderItems || lines.some(p => p.quantity > maxOrderQty)) {
@@ -278,8 +307,13 @@ if (form) {
         result.textContent = 'Уточніть вартість товарів перед оформленням замовлення.';
         return;
       }
+      const actualGrams = lines.reduce((sum, product) => sum + product.weight * product.quantity, 0);
+      if (fields.delivery !== 'pickup' && actualGrams < config.shippingThresholdGrams) {
+        result.textContent = 'Для безкоштовної доставки додайте ще ' + (config.shippingThresholdGrams - actualGrams) + ' г або виберіть самовивіз.';
+        return;
+      }
       const response = await config.submitOrder({ ...fields, phone: '+380' + digits,
-        items: lines.map(({ id, name, quantity, price }) => ({ id, title: name, qty: quantity, price })),
+        items: lines.map(({ id, name, quantity, price, weight }) => ({ id, title: name, qty: quantity, price, grams: weight })),
         total: payable });
       for (const { id, quantity } of lines) {
         const remaining = (cart[id] ?? 0) - quantity;

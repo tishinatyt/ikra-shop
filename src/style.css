@@ -110,9 +110,11 @@ header nav a{text-decoration:none;font-weight:500}
 .skip:focus{transform:none}
 footer{background:var(--roe-tile) 0 0/64px 56px repeat scroll,var(--tin-tile) 0 0/512px repeat scroll #0B2229;color:var(--frost)}
 .footer{padding-block:1.35rem}
-.contact-links{display:flex;align-items:center;gap:.6rem 1rem;flex-wrap:wrap;margin-bottom:1rem}
+.contact-links{display:flex;align-items:center;gap:.6rem 1rem;flex-wrap:wrap;margin-bottom:1rem;min-width:0}
+.contact-links>*{max-width:100%;min-width:0;white-space:normal}
 .footer .contact-links{margin-bottom:0}
 .footer .contact-links .button{color:var(--frost);border-color:var(--tin)}
+.footer-delivery{max-width:62rem;margin:.25rem 0;font-size:.9rem;line-height:1.55}
 .header-phone{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;font-size:.925rem;font-weight:500;white-space:nowrap}
 .phone-icon{display:none}
 @media(max-width:760px){
@@ -227,7 +229,13 @@ details p{margin:.65rem 0 0;max-width:70ch}
 .placeholder{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.15rem;text-align:center;background:radial-gradient(ellipse,var(--frost),#c9d9de);color:var(--deep-2)}
 .placeholder span{font:700 1.6rem var(--serif)}
 .stock{color:var(--deep-2);font-size:.9rem}
-.product,.checkout{display:grid;gap:clamp(1.4rem,4vw,3rem);align-items:start}
+.stock.in-stock{color:#176b3b;font-weight:700}
+.stock.preorder{color:#70441d}
+.shipping-hint,.payment-hint,.pickup-info{padding:.75rem 1rem;border-radius:.75rem;background:var(--ice);line-height:1.5}
+.shipping-progress{height:.75rem;overflow:hidden;border:1px solid var(--line);border-radius:var(--pill);background:var(--frost)}
+.shipping-progress span{display:block;width:0;height:100%;border-radius:inherit;background:#27834b;transition:width .2s ease}
+.product,.checkout{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(1.4rem,4vw,3rem);align-items:start}
+.checkout>*{min-width:0}
 .product>.ice-photo,.product>.placeholder,.product>.similar-photo{border-radius:var(--card-radius);overflow:hidden}
 .product h1{font-size:clamp(2rem,4.6vw,3.75rem)}
 .price{font-weight:600;font-size:1.4rem}
@@ -238,11 +246,12 @@ dd{margin:0;font-weight:600}
 label{display:grid;gap:.3rem;font-size:.9rem;font-weight:600}
 input,textarea,select{width:100%;min-width:0;background:var(--frost);border:1px solid #667e85;border-radius:.6rem;padding:.55rem .65rem;min-height:2.75rem}
 textarea{resize:vertical}
-.order{display:grid;gap:.8rem}
+.order{display:grid;grid-template-columns:minmax(0,1fr);gap:.8rem;min-width:0}
+.order>*{min-width:0}
 .order fieldset{min-width:0;display:grid;gap:.8rem;margin:0;padding:0;border:0}
 .order h2{font-size:1.55rem;margin:0}
 .line-item{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.65rem;border-top:1px solid var(--tin);padding:.75rem 0}
-.line-item-product{display:flex;align-items:center;gap:.8rem;flex:1 1 15rem;min-width:0;overflow-wrap:anywhere}
+.line-item-product{display:flex;align-items:center;gap:.8rem;flex:1 1 10rem;min-width:0;overflow-wrap:anywhere}
 .cart-thumbnail{flex:none;width:64px;aspect-ratio:1;padding:5px;border-radius:.6rem}
 .line-item label{max-width:6rem}
 #cart-total{font-weight:600}

@@ -48,8 +48,8 @@ test('Telegram receives escaped HTML and logs error details without the token or
         parameters: { migrate_to_chat_id: newChatId } }, { status: 400 });
     } });
   const base = { name: 'Ім’я <div>&', phone: '0636002006', delivery: 'chernihiv', address: '<p>Адреса</p>',
-    comment: '<br>', items: [{ id: 'sku-test', title: '<i>Ікра</i>', qty: 2, price: 5 }], total: 10 };
-  const invalidCart = await handler(request(allowed[0], 'POST', { ...base, total: 11 }));
+    comment: '<br>', items: [{ id: 'rkp-1-18', title: '<i>Ікра</i>', qty: 5, grams: 200, price: 5 }], total: 25 };
+  const invalidCart = await handler(request(allowed[0], 'POST', { ...base, total: 26 }));
   assert.equal(invalidCart.status, 400);
   assert.equal((await invalidCart.json()).code, 'INVALID_CART');
   const invalidAddress = await handler(request(allowed[0], 'POST', { ...base, address: '' }));
@@ -60,6 +60,9 @@ test('Telegram receives escaped HTML and logs error details without the token or
   assert.match(sent.text, /&lt;p&gt;Адреса&lt;\/p&gt;/);
   assert.match(sent.text, /&lt;i&gt;Ікра&lt;\/i&gt;/);
   assert.match(sent.text, /&lt;br&gt;/);
+  assert.match(sent.text, /<b>Оплата:<\/b> Передоплата на картку/);
+  assert.match(sent.text, /<b>Вага:<\/b> 1000 г/);
+  assert.match(sent.text, /1000 г; В наявності/);
   assert.doesNotMatch(sent.text.replace(/<\/?b>/g, ''), /[<>]|tel:/);
   assert.deepEqual(logs.mock.calls.map(c => c.arguments), [
     ['ikra-order:', 'total does not match items'],
@@ -69,6 +72,33 @@ test('Telegram receives escaped HTML and logs error details without the token or
       parameters: { migrate_to_chat_id: newChatId }
     }]
   ]);
+});
+
+test('delivery is rejected below 1000 g and accepted at exactly 1000 g using catalog weights', async t => {
+  t.mock.method(console, 'error', () => {});
+  let message = '';
+  const handler = createHandler({ env: () => 'fixture-secret', send: async (_url, { body }) => {
+    message = JSON.parse(body).text;
+    return Response.json({ ok: true });
+  } });
+  const base = { name: 'Покупець', phone: '0636002006', delivery: 'novaposhta', city: 'Чернігів', npBranch: '1',
+    items: [{ id: 'rkp-1-16', title: 'Форель 500 г', qty: 1, grams: 500, price: 100 }], total: 100 };
+  const below = await handler(request(allowed[0], 'POST', base));
+  assert.equal(below.status, 400);
+  assert.equal((await below.json()).code, 'INVALID_CART');
+  const exact = await handler(request(allowed[0], 'POST', { ...base,
+    items: [{ ...base.items[0], qty: 2 }], total: 200 }));
+  assert.equal(exact.status, 200);
+  assert.match(message, /<b>Оплата:<\/b> Передоплата на картку/);
+  assert.match(message, /<b>Вага:<\/b> 1000 г/);
+  assert.match(message, /1000 г; В наявності/);
+  const copper = await handler(request(allowed[0], 'POST', { ...base,
+    items: [{ id: 'rkp-1-01', title: 'Ікра кети Copper River, 500 г', qty: 2, grams: 500, price: 100 }], total: 200 }));
+  assert.equal(copper.status, 200);
+  assert.match(message, /Ікра кети Copper River, 500 г × 2 \(1000 г; В наявності\)/);
+  const spoofed = await handler(request(allowed[0], 'POST', { ...base,
+    items: [{ ...base.items[0], grams: 1000 }] }));
+  assert.equal(spoofed.status, 400);
 });
 
 test('checkout distinguishes rejected carts from network errors and server failures', async t => {

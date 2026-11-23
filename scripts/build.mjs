@@ -7,6 +7,14 @@ import { config } from '../config.mjs';
 import { packaging, species, stocks, money, escape as e, productPath, selectHits, selectSets } from '../src/shop.mjs';
 
 const products = JSON.parse(await readFile('data/products.json', 'utf8')).filter(p => p.visible === true);
+products.sort((a, b) => Number(b.availability === 'in_stock') - Number(a.availability === 'in_stock'));
+const copperSource = 'assets/products/copper-river-keta-500.webp';
+if (products.some(p => p.id === 'rkp-1-01')) {
+  await sharp(await readFile(copperSource)).resize({ width: 480, withoutEnlargement: true }).webp({ quality: 88 })
+    .toFile('assets/products/copper-river-keta-500-480.webp');
+  await sharp(await readFile(copperSource)).resize({ width: 960, withoutEnlargement: true }).webp({ quality: 90 })
+    .toFile('assets/products/copper-river-keta-500-960.webp');
+}
 const unique = field => new Set(products.map(p => p[field])).size === products.length;
 if (!unique('slug') || !unique('id') || products.some(p =>
   !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.slug) || !p.id || !p.name || !p.brand ||
@@ -44,21 +52,23 @@ const deliveryPath = 'dostavka-chernihiv/';
 const seasonPath = 'ikra-na-novyi-rik/';
 const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Kyiv', dateStyle: 'short' }).format(new Date());
 const seasonalBanner = config.newYearPromotionUntil && today <= config.newYearPromotionUntil;
-const homeTitle = 'Червона ікра з доставкою по Чернігову';
-const deliverySummary = 'Доставляємо Черніговом у день замовлення. По Україні відправляємо Новою поштою.';
+const homeTitle = 'Червона ікра в Чернігові — самовивіз і доставка';
+const deliverySummary = 'Самовивіз у Чернігові або безкоштовна доставка кур’єром чи Новою Поштою від 1 кг продукції.';
 const warrantyPromise = 'Якщо незалежна акредитована лабораторія підтвердить, що ікра з нашого магазину не натуральна, ми повернемо 100% вартості та компенсуємо витрати на експертизу.';
 const faq = [
-  ['Як працює доставка в Чернігові та по Україні?', deliverySummary + ' ' + config.localDeliveryTerms],
+  ['Як працює доставка в Чернігові та по Україні?', config.localDeliveryTerms],
   ['Як діє гарантія натуральності?', warrantyPromise + ' Для звернення збережіть банку з етикеткою та номер замовлення. Строк звернення — 14 днів із дня отримання.', warrantyPath],
   ['Як зберігати червону ікру?', 'Зберігайте банку в холодильнику за температури, вказаної виробником на етикетці. Після відкриття дотримуйтеся умов зберігання для відкритої упаковки.'],
   ['Який термін придатності?', 'Перевіряйте дату на банці. Термін залежить від виробника, фасування й умов зберігання.'],
   ['Як вибрати якісну ікру?', 'Перевірте склад, вид риби, виробника, строк придатності й цілісність упаковки. Ікринки різних видів відрізняються розміром і кольором.'],
-  ['Як доставляють охолоджену ікру?', 'І в Чернігові, і під час відправлення по Україні використовуємо термоупаковку. Після отримання помістіть ікру в холодильник. Якщо замовлення їде Новою поштою, заберіть його з відділення якнайшвидше.']
+  ['Як зберігати ікру після отримання?', 'Після отримання помістіть ікру в холодильник і дотримуйтеся температури та умов зберігання, вказаних виробником на етикетці.']
 ];
 const organization = schema('Store', {
   name: config.siteName, ...(base && { url: base.href }), ...(config.phone && { telephone: config.phone }),
   areaServed: [{ '@type': 'City', name: 'Чернігів' }, { '@type': 'Country', name: 'Україна' }],
   ...(config.address && { address: config.address }),
+  openingHours: config.openingHours,
+  openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '09:00', closes: '20:00' }],
   ...(config.telegram && { sameAs: [config.telegram] })
 });
 const link = (prefix, path, label) => '<a href="' + e(prefix + path) + '">' + e(label) + '</a>';
@@ -90,23 +100,24 @@ const warrantyLink = prefix => '<p class="warranty-link">' + shield + link(prefi
 function image(p, prefix, eager = false) {
   if (!p.photo) return '<div class="placeholder ' + e(p.species) + '" role="img" aria-label="Фото готується: ' + e(species[p.species]) + '"><span>' + e(species[p.species]) + '</span><small>Фото готується</small></div>';
   const similar = p.photo_source === 'similar';
-  const blend = [p.photo.small, p.photo.large].every(path => opaqueLightPhotos.has(path)) ? ' photo-multiply' : '';
+  const blend = p.photo_source === 'placeholder' ? '' :
+    [p.photo.small, p.photo.large].every(path => opaqueLightPhotos.has(path)) ? ' photo-multiply' : '';
   const img = '<div class="ice-photo"><img class="product-photo' + blend + '" width="600" height="450" src="' + e(prefix + p.photo.small) +
     '" srcset="' + e(prefix + p.photo.small) + ' 480w, ' + e(prefix + p.photo.large) +
     ' 960w" sizes="' + (eager ? '(max-width: 760px) 92vw, 560px' : '(max-width: 760px) 45vw, 300px') +
     '" loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async" alt="' +
-    e('Ікра ' + varieties[p.species][1] + ' «' + p.brand + '» ' + p.weight + ' г — купити в Чернігові') + '"></div>';
+    e(p.alt || ('Ікра ' + varieties[p.species][1] + ' «' + p.brand + '» ' + p.weight + ' г — купити в Чернігові')) + '"></div>';
   return similar ? '<figure class="similar-photo">' + img + '<figcaption>Фото іншого фасування</figcaption></figure>' : img;
 }
-function add(id, enabled, kind = 'product') {
+function add(id, enabled, kind = 'product', availability = 'in_stock') {
   return '<button class="button" data-add="' + e(id) + '" data-kind="' + kind + '"' +
-    (enabled ? '' : ' disabled') + '>До кошика</button>';
+    (enabled ? '' : ' disabled') + '>' + (availability === 'preorder' ? 'Замовити' : 'До кошика') + '</button>';
 }
 function card(p, prefix) {
   return '<article class="card" data-id="' + e(p.id) + '"><a class="card-image" href="' + e(prefix + productPath(p)) +
     '">' + image(p, prefix) + '</a><div class="card-info"><p class="product-meta"><span>' + e(p.brand) + '</span><span>' + p.weight +
-    ' г</span></p><h3>' + link(prefix, productPath(p), p.name) + '</h3><p class="stock">' + stocks[p.availability] +
-    '</p><div class="card-buy"><strong>' + money(p.price) + '</strong>' + add(p.id, p.availability !== 'out') +
+    ' г</span></p><h3>' + link(prefix, productPath(p), p.name) + '</h3><p class="stock ' + (p.availability === 'in_stock' ? 'in-stock' : 'preorder') + '">' + stocks[p.availability] +
+    '</p><div class="card-buy"><strong>' + money(p.price) + '</strong>' + add(p.id, true, 'product', p.availability) +
     '</div>' + warrantyLink(prefix) + '</div></article>';
 }
 const grid = (items, prefix) => items.map(p => card(p, prefix)).join('');
@@ -134,7 +145,7 @@ const setCards = prefix => sets.map(set => '<article class="card">' + image(set.
   '<div class="card-info"><h3>' + e(set.name) + '</h3><ul>' + set.items.map(p => '<li>' +
   link(prefix, productPath(p), p.name) + '</li>').join('') + '</ul><div class="card-buy"><strong>' +
   money(set.price) + '</strong>' + add(set.id, true, 'set') + '</div></div></article>').join('');
-entry('', 'Червона ікра в Чернігові з доставкою', 'Купити червону ікру в Чернігові з доставкою в день замовлення. Ікра форелі, горбуші, кети та подарункові набори. По Україні відправляємо Новою поштою.', `
+entry('', 'Червона ікра в Чернігові', 'Червона ікра в Чернігові: самовивіз на Мстиславській, 67. Безкоштовний кур’єр і Нова Пошта по Україні для замовлень від 1 кг. Ціни та наявність у каталозі.', `
 <section class="hero"><canvas id="roe" aria-hidden="true"></canvas><div class="lid"><div class="lid-inner">
 <h1>${homeTitle}</h1><p class="lead">${deliverySummary}</p>
 <div class="hero-actions"><a class="button primary" href="katalog/">Перейти до каталогу</a><a href="#delivery">Умови доставки</a></div>
@@ -142,27 +153,30 @@ entry('', 'Червона ікра в Чернігові з доставкою',
 ${seasonalBanner ? '<section class="slab" data-season-until="' + e(config.newYearPromotionUntil) + '"><h2>Ікра на Новий рік у Чернігові</h2><p>Добірка для святкового столу та подарунків.</p>' + link('', seasonPath, 'Переглянути новорічну добірку') + '</section>' : ''}
 <section class="slab" id="hits"><div class="section-head"><h2>Хіти</h2><a href="katalog/">Весь каталог</a></div>
 ${hits.length ? '<div class="grid">' + grid(hits, '') + '</div>' : '<p class="empty">Добірку готуємо. Тут з’являться форель, горбуша, кета й чавича після оновлення асортименту.</p>'}</section>
-<section class="slab warranty" id="warranty"><div class="warranty-inner">${seal}<div><h2>Гарантія натуральності</h2><p>${warrantyPromise}</p><a class="button" href="${warrantyPath}">Умови гарантії</a></div></div></section>
+<section class="slab warranty" id="warranty"><div class="warranty-inner">${seal}<div><h2>Гарантія натуральності</h2><p>${warrantyPromise}</p><a class="button" href="${warrantyPath}">Умови гарантії</a> <a href="${producerPath}#certificates">Сертифікати виробника</a></div></div></section>
 <section class="slab" id="sets"><h2>Подарункові набори</h2>${sets.length ? '<div class="grid">' + setCards('') + '</div>' : '<p>Набори з кількох видів ікри з’являться після оновлення асортименту.</p>'}</section>
 <section class="slab"><h2>Види ікри</h2>${varietyLinks('')}</section>
-<section class="slab" id="delivery"><h2>Доставка в Чернігові та по Україні</h2><p>${deliverySummary} ${e(config.localDeliveryTerms)}</p><p>${link('', deliveryPath, 'Докладніше про доставку')}</p><ul class="benefits"><li>Свіжа охолоджена ікра</li><li>Доставка в термоупаковці</li><li>Перевірені торгові марки</li>${config.paymentMethods[0] ? '<li>' + e(config.paymentMethods[0].label) + '</li>' : ''}</ul></section>
+<section class="slab" id="delivery"><h2>Доставка в Чернігові та по Україні</h2><p>${e(config.localDeliveryTerms)}</p><p>${link('', deliveryPath, 'Докладніше про доставку')}</p><ul class="benefits"><li>Самовивіз щодня 9:00–20:00</li><li>Кур’єр і Нова Пошта безкоштовно від 1 кг</li><li>Оплата при отриманні для самовивозу</li><li>Передоплата на картку для доставки</li></ul></section>
 <section class="slab" id="faq"><h2>Поширені запитання</h2>${faqBody(faq)}</section>`,
 [faqSchema(faq)], { query: 'купити червону ікру в Чернігові' });
 
-const standards = [['ISO 9001', 'iso-9001'], ['ISO 22000', 'iso-22000'], ['HACCP', 'haccp']];
+const standards = [
+  ['Сертифікат FSSC 22000 (Bureau Veritas) — ТОВ «Рибкопродукт», № 20240057F/2, дійсний до 18.09.2028', 'fssc-22000-bureau-veritas'],
+  ['Декларація виробника № 26-128 від 10.11.2026 — ікра горбуші', 'deklaratsiia-vyrobnyka-26-128']
+];
 const certificateFiles = await readdir('assets/certificates');
 const certificates = await Promise.all(standards.map(async ([name, stem]) => {
   const file = certificateFiles.find(file => ['webp', 'jpg', 'jpeg', 'png'].some(ext => file === stem + '.' + ext));
-  return [name, file, file ? await sharp('assets/certificates/' + file).metadata() : {}];
+  const thumbnail = certificateFiles.find(file => file === stem + '-480.webp') || file;
+  return [name, file, thumbnail, file ? await sharp('assets/certificates/' + thumbnail).metadata() : {}];
 }));
 const certificateContent = certificates.some(([, file]) => file) ?
-  '<div class="certificate-grid">' + certificates.map(([name, file, { width, height }]) =>
-    '<figure class="certificate"><figcaption><strong>' + e(name) + '</strong>' +
-    (file ? '<span>сертифікат надано виробником</span>' : '') + '</figcaption>' +
-    (file ? '<a href="../media/certificates/' + file + '"><img loading="lazy" width="' + width + '" height="' + height + '" src="../media/certificates/' + file +
-      '" alt="Скан документа виробника ' + e(name) + '"></a>' :
+  '<div class="certificate-grid">' + certificates.map(([name, file, thumbnail, { width, height }]) =>
+    '<figure class="certificate"><a href="../media/certificates/' + file + '"><img loading="lazy" width="' + width + '" height="' + height + '" src="../media/certificates/' + thumbnail +
+      '" alt="' + e(name) + '"></a><figcaption><strong>' + e(name) + '</strong></figcaption>' +
+    (file ? '' :
       '<div class="certificate-placeholder">Скан документа готується</div>') + '</figure>').join('') + '</div>' :
-  '<ul class="standards">' + standards.map(([name]) => '<li>' + e(name) + '</li>').join('') + '</ul>';
+  '<p>Система безпечності харчових продуктів сертифікована за FSSC 22000 (включає ISO 22000:2018 та ISO/TS 22002-1).</p>';
 
 entry(producerPath, 'Про виробника Рибкопродукт', 'Дізнайтеся про українського виробника ікри Рибкопродукт, його торгові марки, походження сировини, сертифікати та контроль якості під час виробництва.', `
 <article class="slab info-page">${crumb('../', producer)}<h1>Про виробника</h1>
@@ -170,8 +184,8 @@ entry(producerPath, 'Про виробника Рибкопродукт', 'Ді�
 <p>«Рибкопродукт» працює на українському ринку з 2008 року. Компанія позиціонує себе як найбільший виробник червоної ікри в Україні. За даними РКП, асортимент налічує близько 60 найменувань під більш ніж 10 торговими марками. Серед них — «Червоне Золото», «Золота Унція» та «Острів».</p>
 <section><h2>Походження та контроль якості</h2>
 <p>РКП використовує сировину з Аляски та Скандинавії. За інформацією виробника, на виробництві застосовують озонування для підтримання стерильності, а під час перевезення контролюють температуру, щоб зберегти холодовий ланцюг.</p></section>
-<section><h2>Сертифікати виробника</h2>
-<p>РКП повідомляє, що його систему контролю якості сертифіковано за ISO 9001, ISO 22000 та HACCP.</p>
+<section id="certificates"><h2>Сертифікати виробника</h2>
+<p>Система безпечності харчових продуктів сертифікована за FSSC 22000 (включає ISO 22000:2018 та ISO/TS 22002-1).</p>
 ${certificateContent}</section>
 </article>`, [breadcrumbSchema(producer)], { query: 'виробник ікри Рибкопродукт' });
 
@@ -185,7 +199,8 @@ entry(warrantyPath, 'Гарантія натуральності ікри', 'У�
 <li>Зверніться до нас протягом 14 днів із дня отримання замовлення.</li>
 <li>Передайте ікру на експертизу до незалежної акредитованої лабораторії та надайте нам її висновок.</li>
 <li>Якщо висновок підтвердить, що ікра не натуральна, ми повернемо 100% її вартості й компенсуємо витрати на експертизу протягом 7 днів після отримання висновку.</li>
-</ol><p>Звернутися щодо гарантії: ${phoneLink}</p></section></article>`, [breadcrumbSchema(warranty)], { query: 'гарантія натуральності ікри' });
+</ol><p>Звернутися щодо гарантії: ${phoneLink}</p><p>${link('../', producerPath + '#certificates', 'Переглянути сертифікати виробника')}</p>
+<p>${e(config.localDeliveryTerms)}</p></section></article>`, [breadcrumbSchema(warranty)], { query: 'гарантія натуральності ікри' });
 
 function filter(name, label, values, display) {
   return '<label>' + label + '<select name="' + name + '"><option value="">Усі</option>' +
@@ -214,16 +229,15 @@ ${filter('availability', 'Наявність', values('availability'), v => stoc
 const deliveryTitle = 'Доставка ікри по Чернігову';
 const deliveryCrumbs = [...home, [deliveryPath, deliveryTitle]];
 const deliveryFaq = [
-  ['Чи можна отримати ікру в Чернігові сьогодні?', 'Доставляємо по Чернігову в день замовлення. ' + config.localDeliveryTerms],
-  ['У які райони Чернігова доставляєте?', 'Доставляємо в Деснянський і Новозаводський райони. Під час підтвердження уточнюємо адресу й час.'],
-  ['Як відправляєте замовлення по Україні?', 'Відправляємо Новою поштою в термоупаковці. Узгодьте день відправлення та заберіть посилку після прибуття.']
+  ['Де доступний самовивіз?', 'Самовивіз за адресою Чернігів, вул. Мстиславська, 67, щодня 9:00–20:00. Оплата при отриманні.'],
+  ['Коли кур’єр і Нова Пошта безкоштовні?', 'Коли сумарна вага банок у кошику становить щонайменше 1000 г. Для доставки потрібна передоплата на картку; реквізити надішлемо після підтвердження.'],
+  ['Що робити, якщо в кошику менше 1 кг?', 'Можна оформити самовивіз. Додайте товари до 1000 г, щоб стали доступні безкоштовні кур’єр по Чернігову або Нова Пошта.']
 ];
-entry(deliveryPath, deliveryTitle, 'Доставка ікри в Деснянський і Новозаводський райони Чернігова в день замовлення. Дізнайтеся, як пакуємо ікру та відправляємо її Новою поштою по Україні.', `
+entry(deliveryPath, deliveryTitle, 'Самовивіз і безкоштовна доставка ікри по Чернігову та Україні: кур’єр або Нова Пошта від 1 кг. Передоплата на картку після підтвердження. Деталі — тут.', `
 <article class="slab info-page">${crumb('../', deliveryCrumbs)}<h1>${deliveryTitle}</h1>
-<p class="intro">Магазин «${e(config.siteName)}» доставляє ікру в Деснянський і Новозаводський райони Чернігова в день замовлення.</p>
-<p>${e(config.localDeliveryTerms)}</p>
-<section><h2>Як зберігаємо холод</h2><p>Пакуємо охолоджену ікру в термоупаковку, яка допомагає зберігати холод під час перевезення. Після отримання поставте банку в холодильник і орієнтуйтеся на температуру з етикетки.</p></section>
-<section><h2>Замовлення по Україні</h2><p>Відправляємо Новою поштою. Під час підтвердження замовлення узгоджуємо день відправлення. За можливості заберіть посилку одразу після прибуття.</p></section>
+<p class="intro">Самовивіз: ${e(config.pickupAddress)}, щодня 9:00–20:00. Оплата при отриманні.</p>
+<p>Кур’єр по Чернігову та Нова Пошта по Україні — безкоштовно, якщо сумарна вага продукції в кошику не менша за 1000 г. Для цих способів доставки — передоплата на картку; реквізити надсилаємо після підтвердження замовлення.</p>
+<p>Для замовлення меншої ваги доступний самовивіз. У кошику показуємо, скільки грамів залишилося до безкоштовної доставки.</p>
 <p>${link('../', 'katalog/', 'Перейти до каталогу')}</p>${contactLinks()}</article>
 <section class="slab"><h2>Запитання про доставку</h2>${faqBody(deliveryFaq, '../')}</section>`,
 [breadcrumbSchema(deliveryCrumbs), faqSchema(deliveryFaq)], { query: 'ікра з доставкою Чернігів' });
@@ -249,14 +263,14 @@ for (const [key, [, name, paragraphs, serving]] of Object.entries(varieties)) {
   const entries = [...catalog, [path, heading]];
   const selected = products.filter(p => p.species === key);
   const description = snippet(heading + ': ціни, фасування та наявність. ' + serving, [
-    'Замовляйте доставку по місту в день замовлення.', 'Доставка по Україні Новою поштою.',
-    'Порівняйте доступні фасування.', 'Є доставка по місту.'
+    'Самовивіз у Чернігові. Кур’єр і Нова Пошта безкоштовно від 1 кг.', 'Доставка по Україні Новою поштою від 1 кг.',
+    'Порівняйте доступні фасування.', 'Дізнайтеся умови самовивозу й доставки.'
   ]);
   entry(path, heading + ' — ціни', description, `
 <article class="slab info-page">${crumb('../', entries)}<h1>${heading}</h1>
 ${paragraphs.map(p => '<p>' + e(p) + '</p>').join('')}</article>
 <section class="slab"><h2>Фасування та ціни</h2><div class="grid">${grid(selected, '../')}</div></section>
-<section class="slab"><h2>Доставка по Чернігову сьогодні</h2><p>${deliverySummary} ${e(config.localDeliveryTerms)}</p>
+<section class="slab"><h2>Самовивіз і доставка</h2><p>${e(config.localDeliveryTerms)}</p>
 <p>${link('../', deliveryPath, 'Переглянути умови доставки')}</p></section>`, [breadcrumbSchema(entries)],
   { query: 'ікра ' + name + ' Чернігів ціна' });
 }
@@ -265,24 +279,25 @@ for (const p of products) {
   const path = productPath(p);
   const [, variety, , serving] = varieties[p.species];
   const entries = [...catalog, [varietyPath(p.species), 'Ікра ' + variety], [path, p.name]];
-  const pack = p.packaging === 'metal' ? 'ж/б' : 'ск/б';
+  const pack = p.packaging === 'metal' ? 'ж/б' : p.packaging === 'plastic' ? 'пл/к' : 'ск/б';
   const title = 'Ікра ' + variety + ' «' + p.brand + '» ' + p.weight + ' г, ' + pack;
   const description = snippet('Ікра ' + variety + ' «' + p.brand + '», ' + p.weight + ' г. ' + packaging[p.packaging] +
     '. Ціна й наявність у каталозі. Доставка в Чернігові та Новою поштою.', [
     'Для святкового столу.', 'Зручно для закусок.', 'Дивіться умови доставки.'
   ]);
-  const productCopy = 'Ікра ' + variety + ' від «' + p.brand + '» у фасуванні ' + p.weight + ' г. ' +
-    serving + ' Зберігайте за температури, зазначеної виробником на етикетці.';
-  const availability = { in: 'InStock', out: 'OutOfStock' }[p.availability];
+  const productCopy = p.description || ('Ікра ' + variety + ' від «' + p.brand + '» у фасуванні ' + p.weight + ' г. ' +
+    serving + ' Зберігайте за температури, зазначеної виробником на етикетці.');
+  const availability = { in_stock: 'InStock', preorder: 'BackOrder' }[p.availability];
   const related = products.filter(item => item.id !== p.id).sort((a, b) =>
-    Number(b.species === p.species) - Number(a.species === p.species)).slice(0, 4);
+    Number(b.species === p.species) - Number(a.species === p.species) ||
+    Number(b.availability === 'in_stock') - Number(a.availability === 'in_stock')).slice(0, 4);
   entry(path, title, description, `<div class="slab">${crumb('../../', entries)}
 <div class="product">${image(p, '../../', true)}<div><h1>${e(p.name)}</h1><p class="product-meta">${e(p.brand)}</p>
-<p class="stock">${stocks[p.availability]}</p><p class="price">${money(p.price)}</p>${add(p.id, p.availability !== 'out')}${warrantyLink('../../')}
+<p class="stock ${p.availability === 'in_stock' ? 'in-stock' : 'preorder'}">${stocks[p.availability]}</p><p class="price">${money(p.price)}</p>${add(p.id, true, 'product', p.availability)}${warrantyLink('../../')}
 <dl>${[['Вид ікри', species[p.species]], ['Торгова марка', p.brand], ['Фасування', p.weight + ' г'], ['Упаковка', packaging[p.packaging]], ['Температурний режим', p.temperature]].map(([label, value]) => '<div><dt>' + label + '</dt><dd>' + e(value) + '</dd></div>').join('')}</dl><p class="product-copy">${e(productCopy)}</p></div></div>
 </div>${related.length ? '<section class="slab"><h2>Схожі товари</h2><div class="grid">' + grid(related, '../../') + '</div></section>' : ''}`,
   [schema('Product', {
-    name: p.name, sku: p.id, description, url: absolute(path), brand: { '@type': 'Brand', name: p.brand },
+    name: p.name, sku: p.id, description: p.description || description, url: absolute(path), brand: { '@type': 'Brand', name: p.brand },
     ...(p.photo && p.photo_source !== 'similar' && { image: absolute(p.photo.large) }),
     ...(p.price != null && { offers: { '@type': 'Offer', price: p.price, priceCurrency: 'UAH',
       url: absolute(path), ...(availability && { availability: 'https://schema.org/' + availability }) } })
@@ -298,14 +313,16 @@ ${config.phone ? '<a class="button secondary" href="tel:' + e(config.phone) + '"
 ${config.telegram ? '<a class="button secondary" href="' + e(config.telegram) + '">Написати в Telegram</a>' : ''}
 ${config.viber ? '<a class="button secondary" href="' + e(config.viber) + '">Написати у Viber</a>' : ''}
 </div>
-<div class="checkout"><section aria-label="Товари у кошику"><div id="cart-items"></div><p id="cart-total"></p></section>
+<div class="checkout"><section aria-label="Товари у кошику"><div id="cart-items"></div><p id="cart-total"></p><p id="shipping-hint" class="shipping-hint"></p><div id="shipping-progress" class="shipping-progress" role="meter" aria-label="Вага для безкоштовної доставки" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="0"><span></span></div></section>
 <form id="order" class="order" hidden><h2>Оформлення замовлення</h2>
 <label>Ім’я<input name="name" autocomplete="given-name" required maxlength="80"></label>
 <label>Телефон<input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+380 (00) 000-00-00" required maxlength="32"></label>
 <label>Спосіб доставки<select name="delivery" required>
-<option value="chernihiv">Доставка по Чернігову</option>
-<option value="novaposhta">Нова пошта по Україні</option>
+<option value="pickup">Самовивіз</option>
+<option value="chernihiv" data-paid-delivery disabled>Кур’єр по Чернігову — безкоштовно від 1 кг</option>
+<option value="novaposhta" data-paid-delivery disabled>Нова Пошта по Україні — безкоштовно від 1 кг</option>
 </select></label>
+<p data-delivery="pickup" class="pickup-info">${e(config.pickupAddress)}, щодня 9:00–20:00. Оплата при отриманні.</p>
 <fieldset data-delivery="chernihiv">
 <label>Адреса в Чернігові<input name="address" autocomplete="street-address" required maxlength="180"></label>
 </fieldset>
@@ -314,6 +331,7 @@ ${config.viber ? '<a class="button secondary" href="' + e(config.viber) + '">Н�
 <label>Відділення Нової пошти<input name="npBranch" required maxlength="120"></label>
 </fieldset>
 <label>Бажаний час (необов’язково)<input name="time" maxlength="60"></label>
+<p id="payment-hint" class="payment-hint">Оплата при отриманні під час самовивозу.</p>
 <label>Коментар<textarea name="comment" rows="3" maxlength="400"></textarea></label>
 <div hidden><label>Вебсайт<input name="website" tabindex="-1" autocomplete="off"></label></div>
 <button class="button primary">Підтвердити замовлення</button></form></div></div>`, [breadcrumbSchema(basket)], { noindex: true, query: 'оформлення замовлення ікри' });
@@ -396,15 +414,19 @@ await writeFile('dist/site.webmanifest', JSON.stringify({
   theme_color: '#2a1a14',
   background_color: '#fbf6ee'
 }, null, 2) + '\n');
-for (const [, file] of certificates.filter(([, file]) => file)) {
+for (const [, file, thumbnail] of certificates.filter(([, file]) => file)) {
   await mkdir('dist/media/certificates', { recursive: true });
   await cp('assets/certificates/' + file, 'dist/media/certificates/' + file);
+  if (thumbnail && thumbnail !== file) await cp('assets/certificates/' + thumbnail, 'dist/media/certificates/' + thumbnail);
 }
 for (const file of ['hero.jpg', 'hero-small.jpg', 'og-image.jpg']) await cp('assets/' + file, 'dist/media/' + file);
 for (const path of photoFiles) await cp(photoAsset(path), 'dist/' + path);
-await writeFile('dist/products.json', json(products.map(({ id, slug, name, species, brand, weight, packaging, temperature, price, availability, photo, visible }) => ({
+await writeFile('dist/products.json', json(products.map(({ id, slug, name, species, brand, weight, packaging, temperature,
+  price, availability, photo, photo_source, description, alt, visible }) => ({
   id, slug, name, species, brand, weight, packaging, temperature, price, availability, visible,
-  photo: photo ? { small: photo.small, large: photo.large, multiplySmall: opaqueLightPhotos.has(photo.small) } : null
+  photo: photo ? { small: photo.small, large: photo.large,
+    multiplySmall: photo_source !== 'placeholder' && opaqueLightPhotos.has(photo.small) } : null,
+  ...(description && { description }), ...(alt && { alt })
 }))));
 for (const [path, page] of pages) {
   const prefix = path === '404.html' ? absolute('') : '../'.repeat(path.split('/').length - 1);
@@ -431,7 +453,7 @@ ${base ? '<link rel="canonical" href="' + e(absolute(path)) + '"><meta property=
 ${path === '' ? '<script defer src="assets/js/roe.js"></script>' : ''}
 <script type="application/ld+json">${json([{ ...organization, logo: base ? absolute(organizationLogo) : prefix + organizationLogo }, ...page.structured])}</script></head><body>
 <a class="skip" href="#main">До вмісту</a><header><div class="wrap header"><a class="wordmark" href="${e(prefix || './')}">${logo('logo-compact.svg')}</a><nav aria-label="Головна навігація">${link(prefix, 'katalog/', 'Каталог')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, producerPath, 'Про виробника')}</nav>${headerPhone}<a class="basket" href="${e(prefix)}koshyk/">Кошик <span id="cart-count">0</span></a></div></header>
-<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}</nav>${contactLinks()}<nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav><small>© 2026 ${e(config.siteName)}</small></div></footer><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
+<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}</nav>${contactLinks()}<nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav><p class="footer-delivery">${e(config.localDeliveryTerms)}</p><small>© 2026 ${e(config.siteName)}</small></div></footer><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
 }
 const indexable = [...pages].filter(([, page]) => !page.noindex);
 await writeFile('dist/sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +

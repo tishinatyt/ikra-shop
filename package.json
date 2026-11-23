@@ -6,6 +6,7 @@
     "build": "node scripts/build.mjs",
     "sync": "node scripts/sync-ikura.mjs",
     "fetch-ikura": "node scripts/fetch-ikura.mjs",
+    "test": "npm run build && node --test test/*.test.mjs",
     "test:ikura": "node --test test/fetch-ikura.test.mjs",
     "preview": "node scripts/preview.mjs"
   },

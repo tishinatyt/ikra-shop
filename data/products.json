@@ -8,13 +8,14 @@
     "weight": 500,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 3426,
     "photo": {
       "small": "media/products/rkp-1-03-3f2ff6247c62-480.webp",
       "large": "media/products/rkp-1-03-3f2ff6247c62-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-06",
@@ -25,13 +26,14 @@
     "weight": 190,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 1334,
     "photo": {
       "small": "media/products/rkp-1-06-ead6a6c7149f-480.webp",
       "large": "media/products/rkp-1-06-ead6a6c7149f-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-10",
@@ -42,13 +44,14 @@
     "weight": 500,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 6711,
     "photo": {
       "small": "media/products/rkp-1-10-fe2458f4e914-480.webp",
       "large": "media/products/rkp-1-10-fe2458f4e914-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-12",
@@ -59,13 +62,14 @@
     "weight": 250,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
-    "price": 2308,
+    "price": 3319,
     "photo": {
       "small": "media/products/rkp-1-12-0d26dc4fb2c1-480.webp",
       "large": "media/products/rkp-1-12-0d26dc4fb2c1-960.webp"
-    }
+    },
+    "price_source": "markup"
   },
   {
     "id": "rkp-1-13",
@@ -76,13 +80,14 @@
     "weight": 200,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "in_stock",
     "visible": true,
-    "price": 2664,
+    "price": 2659,
     "photo": {
       "small": "media/products/rkp-1-13-e21dfbf81635-480.webp",
       "large": "media/products/rkp-1-13-e21dfbf81635-960.webp"
-    }
+    },
+    "price_source": "markup"
   },
   {
     "id": "rkp-1-14",
@@ -93,13 +98,14 @@
     "weight": 100,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 1501,
     "photo": {
       "small": "media/products/rkp-1-14-6579980a45aa-480.webp",
       "large": "media/products/rkp-1-14-6579980a45aa-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-16",
@@ -110,13 +116,14 @@
     "weight": 500,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "in_stock",
     "visible": true,
     "price": 3593,
     "photo": {
       "small": "media/products/rkp-1-16-716b0e521f75-480.webp",
       "large": "media/products/rkp-1-16-716b0e521f75-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-17",
@@ -127,13 +134,14 @@
     "weight": 250,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 1757,
     "photo": {
       "small": "media/products/rkp-1-17-ac0419221974-480.webp",
       "large": "media/products/rkp-1-17-ac0419221974-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-18",
@@ -144,13 +152,14 @@
     "weight": 200,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "in_stock",
     "visible": true,
     "price": 1419,
     "photo": {
       "small": "media/products/rkp-1-18-7d615e6e1f0b-480.webp",
       "large": "media/products/rkp-1-18-7d615e6e1f0b-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-19",
@@ -161,14 +170,15 @@
     "weight": 100,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 729,
     "photo": {
       "small": "media/products/rkp-1-18-7d615e6e1f0b-480.webp",
       "large": "media/products/rkp-1-18-7d615e6e1f0b-960.webp"
     },
-    "photo_source": "similar"
+    "photo_source": "similar",
+    "price_source": "markup"
   },
   {
     "id": "rkp-1-22",
@@ -179,13 +189,14 @@
     "weight": 500,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 7336,
     "photo": {
       "small": "media/products/rkp-1-22-336ed189a3cd-480.webp",
       "large": "media/products/rkp-1-22-336ed189a3cd-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-24",
@@ -196,13 +207,14 @@
     "weight": 250,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 3628,
     "photo": {
       "small": "media/products/rkp-1-24-4fff7a3935c1-480.webp",
       "large": "media/products/rkp-1-24-4fff7a3935c1-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-25",
@@ -213,13 +225,14 @@
     "weight": 200,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "in_stock",
     "visible": true,
-    "price": 2913,
+    "price": 2919,
     "photo": {
       "small": "media/products/rkp-1-25-6a0ed7bed64d-480.webp",
       "large": "media/products/rkp-1-25-6a0ed7bed64d-960.webp"
-    }
+    },
+    "price_source": "markup"
   },
   {
     "id": "rkp-1-26",
@@ -230,13 +243,14 @@
     "weight": 100,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 1611,
     "photo": {
       "small": "media/products/rkp-1-26-8540c7cd69ef-480.webp",
       "large": "media/products/rkp-1-26-8540c7cd69ef-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-28",
@@ -247,14 +261,15 @@
     "weight": 500,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 6359,
     "photo": {
       "small": "media/products/rkp-1-30-5540fea26e1d-480.webp",
       "large": "media/products/rkp-1-30-5540fea26e1d-960.webp"
     },
-    "photo_source": "similar"
+    "photo_source": "similar",
+    "price_source": "markup"
   },
   {
     "id": "rkp-1-29",
@@ -265,14 +280,15 @@
     "weight": 250,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 3159,
     "photo": {
       "small": "media/products/rkp-1-30-5540fea26e1d-480.webp",
       "large": "media/products/rkp-1-30-5540fea26e1d-960.webp"
     },
-    "photo_source": "similar"
+    "photo_source": "similar",
+    "price_source": "markup"
   },
   {
     "id": "rkp-1-30",
@@ -283,13 +299,14 @@
     "weight": 200,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 2536,
     "photo": {
       "small": "media/products/rkp-1-30-5540fea26e1d-480.webp",
       "large": "media/products/rkp-1-30-5540fea26e1d-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-31",
@@ -300,13 +317,14 @@
     "weight": 100,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "out",
+    "availability": "preorder",
     "visible": true,
     "price": 1448,
     "photo": {
       "small": "media/products/rkp-1-31-195f8b0d6c09-480.webp",
       "large": "media/products/rkp-1-31-195f8b0d6c09-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-32",
@@ -317,14 +335,15 @@
     "weight": 500,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 6959,
     "photo": {
       "small": "media/products/rkp-1-34-6bdffc2e88c0-480.webp",
       "large": "media/products/rkp-1-34-6bdffc2e88c0-960.webp"
     },
-    "photo_source": "similar"
+    "photo_source": "similar",
+    "price_source": "markup"
   },
   {
     "id": "rkp-1-33",
@@ -335,14 +354,15 @@
     "weight": 250,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 3459,
     "photo": {
       "small": "media/products/rkp-1-34-6bdffc2e88c0-480.webp",
       "large": "media/products/rkp-1-34-6bdffc2e88c0-960.webp"
     },
-    "photo_source": "similar"
+    "photo_source": "similar",
+    "price_source": "markup"
   },
   {
     "id": "rkp-1-34",
@@ -353,13 +373,14 @@
     "weight": 200,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "out",
+    "availability": "preorder",
     "visible": true,
     "price": 2776,
     "photo": {
       "small": "media/products/rkp-1-34-6bdffc2e88c0-480.webp",
       "large": "media/products/rkp-1-34-6bdffc2e88c0-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-35",
@@ -370,13 +391,14 @@
     "weight": 100,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "out",
+    "availability": "preorder",
     "visible": true,
     "price": 1568,
     "photo": {
       "small": "media/products/rkp-1-35-15d3e6710e46-480.webp",
       "large": "media/products/rkp-1-35-15d3e6710e46-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-36",
@@ -387,13 +409,14 @@
     "weight": 500,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 7547,
     "photo": {
       "small": "media/products/rkp-1-36-1e6b267927c0-480.webp",
       "large": "media/products/rkp-1-36-1e6b267927c0-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-37",
@@ -404,13 +427,14 @@
     "weight": 250,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 3735,
     "photo": {
       "small": "media/products/rkp-1-37-b7d8c9eca031-480.webp",
       "large": "media/products/rkp-1-37-b7d8c9eca031-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-38",
@@ -421,13 +445,14 @@
     "weight": 200,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 3002,
     "photo": {
       "small": "media/products/rkp-1-38-425665d5bf88-480.webp",
       "large": "media/products/rkp-1-38-425665d5bf88-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-1-39",
@@ -438,13 +463,14 @@
     "weight": 100,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 1659,
     "photo": {
       "small": "media/products/rkp-1-39-8540c7cd69ef-480.webp",
       "large": "media/products/rkp-1-39-8540c7cd69ef-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-2-05",
@@ -455,13 +481,14 @@
     "weight": 190,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 1431,
     "photo": {
       "small": "media/products/rkp-2-05-bfa586e9a2ff-480.webp",
       "large": "media/products/rkp-2-05-bfa586e9a2ff-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-2-06",
@@ -472,13 +499,14 @@
     "weight": 100,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 772,
     "photo": {
       "small": "media/products/rkp-2-06-dc9063aac366-480.webp",
       "large": "media/products/rkp-2-06-dc9063aac366-960.webp"
-    }
+    },
+    "price_source": "ikura"
   },
   {
     "id": "rkp-2-07",
@@ -489,14 +517,15 @@
     "weight": 100,
     "packaging": "metal",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 789,
     "photo": {
       "small": "media/products/rkp-2-05-bfa586e9a2ff-480.webp",
       "large": "media/products/rkp-2-05-bfa586e9a2ff-960.webp"
     },
-    "photo_source": "similar"
+    "photo_source": "similar",
+    "price_source": "markup"
   },
   {
     "id": "rkp-2-15",
@@ -507,10 +536,11 @@
     "weight": 120,
     "packaging": "metal",
     "temperature": "0…+6 °C",
-    "availability": "in",
+    "availability": "preorder",
     "visible": true,
     "price": 749,
-    "photo": null
+    "photo": null,
+    "price_source": "markup"
   },
   {
     "id": "rkp-2-17",
@@ -521,10 +551,11 @@
     "weight": 100,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "out",
+    "availability": "preorder",
     "visible": true,
     "price": 629,
-    "photo": null
+    "photo": null,
+    "price_source": "markup"
   },
   {
     "id": "rkp-2-18",
@@ -535,9 +566,31 @@
     "weight": 230,
     "packaging": "glass",
     "temperature": "0…+6 °C",
-    "availability": "out",
+    "availability": "preorder",
     "visible": true,
     "price": 1339,
-    "photo": null
+    "photo": null,
+    "price_source": "markup"
+  },
+  {
+    "id": "rkp-1-01",
+    "slug": "ikra-kety-copper-river-500",
+    "name": "Ікра кети Copper River, 500 г",
+    "species": "chum",
+    "brand": "Copper River (Аляска)",
+    "weight": 500,
+    "packaging": "plastic",
+    "temperature": "−18 °C",
+    "availability": "in_stock",
+    "visible": true,
+    "price": 5849,
+    "description": "Дика кета з Аляски з великою, пружною ікринкою. Ікра солено-морожена, у пластиковому контейнері вагою 500 г.",
+    "alt": "Ікра кети Copper River у пластиковому контейнері 500 г",
+    "photo": {
+      "small": "media/products/copper-river-keta-500-480.webp",
+      "large": "media/products/copper-river-keta-500-960.webp"
+    },
+    "price_source": "markup",
+    "photo_source": "manual"
   }
 ]
