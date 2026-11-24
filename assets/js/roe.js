@@ -11,12 +11,14 @@
   let height = 0;
   let dpr = 1;
   let grains = [];
-  let pointer = false;
   let intersects = false;
   let frame = 0;
   let lastPaint = 0;
-  let elapsed = 0;
   let painted = false;
+  let introDone = false;
+  let mode = '';
+  let startedAt = 0;
+  let activeUntil = 0;
 
   function measure() {
     const nextWidth = canvas.clientWidth;
@@ -104,33 +106,58 @@
     }
   }
 
+  function stop() {
+    if (frame) cancelAnimationFrame(frame);
+    frame = 0;
+  }
+
   function tick(now) {
-    frame = requestAnimationFrame(tick);
     const delta = lastPaint ? now - lastPaint : 1000 / 30;
-    if (painted && delta < 1000 / 30 - 1) return;
-    lastPaint = now;
-    elapsed += delta;
-    if (!pointer) {
-      const angle = elapsed / 5200;
-      target.x = .62 + Math.cos(angle) * .22;
-      target.y = .4 + Math.sin(angle * 1.3) * .25;
+    if (delta < 1000 / 30 - 1) {
+      frame = requestAnimationFrame(tick);
+      return;
     }
-    light.x += (target.x - light.x) * .1;
-    light.y += (target.y - light.y) * .1;
-    paint(elapsed);
+    lastPaint = now;
+    if (mode === 'intro') {
+      const progress = Math.min(1, (now - startedAt) / 900);
+      paint(progress * (Math.max(width, height) * 1.5 + 500));
+      if (progress >= 1) {
+        introDone = true;
+        mode = '';
+        stop();
+        paint(Infinity);
+        return;
+      }
+    } else if (mode === 'interactive') {
+      if (now >= activeUntil) {
+        mode = '';
+        stop();
+        paint(Infinity);
+        return;
+      }
+      light.x += (target.x - light.x) * .12;
+      light.y += (target.y - light.y) * .12;
+      paint(Infinity);
+    }
+    if (mode) frame = requestAnimationFrame(tick);
   }
 
   function sync() {
     if (!intersects || document.hidden || motion.matches) {
-      cancelAnimationFrame(frame);
-      frame = 0;
+      if (mode === 'intro') introDone = true;
+      mode = '';
+      stop();
       lastPaint = 0;
+      if (intersects && !document.hidden) paint(Infinity);
+      return;
     }
-    if (!intersects || document.hidden) return;
     measure();
-    if (motion.matches) {
-      if (!painted) paint(Infinity);
-    } else if (!frame) {
+    if (!painted) paint(Infinity);
+    if (!introDone && !mode) {
+      mode = 'intro';
+      startedAt = performance.now();
+      frame = requestAnimationFrame(tick);
+    } else if (mode === 'interactive' && !frame) {
       frame = requestAnimationFrame(tick);
     }
   }
@@ -142,20 +169,29 @@
   new ResizeObserver(sync).observe(hero);
   document.addEventListener('visibilitychange', sync);
   motion.addEventListener('change', () => {
-    painted = false;
-    if (motion.matches) {
-      light.x = .72;
-      light.y = .25;
-      elapsed = 2000;
-    }
+    light.x = target.x = .72;
+    light.y = target.y = .25;
+    mode = '';
+    stop();
+    if (intersects && !document.hidden) paint(Infinity);
     sync();
   });
   hero.addEventListener('pointermove', event => {
-    if (event.pointerType !== 'mouse' || motion.matches) return;
+    if (event.pointerType !== 'mouse' || motion.matches || mode !== 'interactive') return;
     const bounds = hero.getBoundingClientRect();
-    pointer = true;
     target.x = (event.clientX - bounds.left) / bounds.width;
     target.y = (event.clientY - bounds.top) / bounds.height;
   });
-  hero.addEventListener('pointerleave', () => { pointer = false; });
+  const activate = () => {
+    if (!intersects || document.hidden || motion.matches) return;
+    mode = 'interactive';
+    activeUntil = performance.now() + 6000;
+    if (!frame) {
+      lastPaint = 0;
+      frame = requestAnimationFrame(tick);
+    }
+  };
+  window.addEventListener('pointermove', event => { if (event.pointerType === 'mouse') activate(); }, { passive: true });
+  window.addEventListener('touchstart', activate, { passive: true });
+  window.addEventListener('scroll', activate, { passive: true });
 })();

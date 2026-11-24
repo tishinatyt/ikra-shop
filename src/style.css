@@ -250,6 +250,7 @@ textarea{resize:vertical}
 .order>*{min-width:0}
 .order fieldset{min-width:0;display:grid;gap:.8rem;margin:0;padding:0;border:0}
 .order h2{font-size:1.55rem;margin:0}
+.order-terms{margin:0;font-size:.9rem;line-height:1.5}
 .line-item{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.65rem;border-top:1px solid var(--tin);padding:.75rem 0}
 .line-item-product{display:flex;align-items:center;gap:.8rem;flex:1 1 10rem;min-width:0;overflow-wrap:anywhere}
 .cart-thumbnail{flex:none;width:64px;aspect-ratio:1;padding:5px;border-radius:.6rem}

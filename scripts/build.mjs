@@ -334,7 +334,12 @@ ${config.viber ? '<a class="button secondary" href="' + e(config.viber) + '">Н�
 <p id="payment-hint" class="payment-hint">Оплата при отриманні під час самовивозу.</p>
 <label>Коментар<textarea name="comment" rows="3" maxlength="400"></textarea></label>
 <div hidden><label>Вебсайт<input name="website" tabindex="-1" autocomplete="off"></label></div>
-<button class="button primary">Підтвердити замовлення</button></form></div></div>`, [breadcrumbSchema(basket)], { noindex: true, query: 'оформлення замовлення ікри' });
+<button class="button primary">Надіслати замовлення</button><p class="order-terms">Надсилаючи замовлення, ви погоджуєтесь з <a href="../umovy-prodazhu/">Умовами продажу</a> та <a href="../polityka-konfidentsiinosti/">Політикою конфіденційності</a>.</p></form></div></div>`, [breadcrumbSchema(basket)], { noindex: true, query: 'оформлення замовлення ікри' });
+
+const privacyPath = 'polityka-konfidentsiinosti/';
+const termsPath = 'umovy-prodazhu/';
+entry(privacyPath, 'Політика конфіденційності', 'Дізнайтеся, які контактні дані ми отримуємо під час замовлення, як використовуємо cookies та аналітику і як попросити видалити ваші дані сайту.', `<div class="slab"><h1>Політика конфіденційності</h1><p>Під час оформлення замовлення ми отримуємо ваше ім’я, номер телефону та адресу доставки або дані пункту видачі. Ці дані потрібні, щоб підтвердити замовлення, зв’язатися з вами та доставити його.</p><p>Дані замовлення обробляються в Supabase. Для сповіщення працівників магазину про нові замовлення використовується Telegram. Ми не продаємо ваші персональні дані.</p><p>Сайт зберігає кошик і ваш вибір щодо cookies у браузері. За вашою згодою Google Analytics та Google Ads використовують cookies і подібні технології для вимірювання відвідувань та ефективності реклами. Ви можете змінити вибір у налаштуваннях браузера.</p><p>Щоб попросити видалити дані замовлення, напишіть нам на <a href="tel:${e(config.phone)}">${e(config.phoneDisplay || config.phone)}</a> або в <a href="${e(config.telegram)}">Telegram</a>. Для пошуку замовлення вкажіть його номер і телефон.</p><p>Контакт магазину: <a href="tel:${e(config.phone)}">${e(config.phoneDisplay || config.phone)}</a>.</p></div>`, [], { query: 'політика конфіденційності магазину ікри' });
+entry(termsPath, 'Умови продажу', 'Умови самовивозу, доставки, оплати, повернення та зберігання червоної ікри в магазині у Чернігові. Ознайомтеся з правилами магазину перед купівлею.', `<div class="slab"><h1>Умови продажу</h1><h2>Отримання замовлення</h2><p>Самовивіз: Чернігів, вул. Мстиславська, 67, щодня з 9:00 до 20:00. При самовивозі оплата при отриманні.</p><p>Доставка кур’єром у Чернігові та Новою поштою по Україні безкоштовна для замовлень від 1 кг. Для доставки потрібна передоплата на картку після підтвердження замовлення; реквізити надішлемо після підтвердження.</p><h2>Повернення та гарантія</h2><p>Умови гарантії натуральності та повернення описані на сторінці <a href="../harantiia/">Гарантія натуральності</a>.</p><h2>Зберігання</h2><p>Зберігайте ікру в холодильнику за температури, зазначеної виробником на етикетці. Після відкриття дотримуйтеся умов і строку зберігання для відкритої упаковки, вказаних виробником.</p></div>`, [], { query: 'умови продажу ікри та доставки' });
 
 const missing = [...home, ['404.html', 'Сторінку не знайдено']];
 entry('404.html', 'Сторінку не знайдено', 'Ця сторінка недоступна. Відкрийте каталог магазину «' + config.siteName + '», щоб знайти потрібний вид ікри та переглянути доступні ціни й фасування.', '<div class="slab">' + crumb(absolute(''), missing) + '<h1>Сторінку не знайдено</h1><p>Перейдіть на головну або відкрийте каталог.</p><a class="button" href="' + e(absolute('katalog/')) + '">До каталогу</a></div>', [breadcrumbSchema(missing)], { noindex: true, query: '—' });
@@ -437,18 +442,24 @@ for (const [path, page] of pages) {
   const description = e(page.description);
   const title = e(page.title);
   const analyticsProduct = products.find(p => productPath(p) === path);
-  const analyticsHead = `<script>
-(function(){var host=location.hostname,debug=new URLSearchParams(location.search).get('gtag_debug')==='1';if(!debug&&(host==='localhost'||host==='127.0.0.1'||/^192\\.168\\./.test(host)))return;
-window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments)};
-gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});
-gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',region:['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IS','IE','IT','LV','LI','LT','LU','MT','NL','NO','PL','PT','RO','SK','SI','ES','SE','CH','GB'],wait_for_update:500});
-gtag('js',new Date());gtag('config','${config.analytics.ga4}');gtag('config','${config.analytics.googleAds}');
-var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${config.analytics.ga4}';s.onerror=function(){};document.head.appendChild(s);
-})();
+  const analyticsHead = `<script async src="https://www.googletagmanager.com/gtag/js?id=G-TCSPL6WXF6"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted', analytics_storage: 'granted'});
+gtag('consent', 'default', {ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied', region: ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IS','IE','IT','LV','LI','LT','LU','MT','NL','NO','PL','PT','RO','SK','SI','ES','SE','CH','GB'], wait_for_update: 500});
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  window['ga-disable-G-TCSPL6WXF6'] = true;
+  window['ga-disable-AW-18593348016'] = true;
+}
+gtag('js', new Date());
+gtag('config', 'G-TCSPL6WXF6');
+gtag('config', 'AW-18593348016');
 </script>`;
   const output = path.endsWith('.html') ? path : path + 'index.html';
   await mkdir('dist/' + output.slice(0, output.lastIndexOf('/') + 1), { recursive: true });
-  await writeFile('dist/' + output, `<!doctype html><html lang="uk"><head>${analyticsHead}<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  await writeFile('dist/' + output, `<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+${analyticsHead}
 <title>${title}</title><meta name="description" content="${description}">
 <meta property="og:site_name" content="${e(config.siteName)}">
 <meta name="theme-color" content="#2a1a14">
@@ -467,7 +478,7 @@ ${base ? '<link rel="canonical" href="' + e(absolute(path)) + '"><meta property=
 ${path === '' ? '<script defer src="assets/js/roe.js"></script>' : ''}
 <script type="application/ld+json">${json([{ ...organization, logo: base ? absolute(organizationLogo) : prefix + organizationLogo }, ...page.structured])}</script></head><body>
 <a class="skip" href="#main">До вмісту</a><header><div class="wrap header"><a class="wordmark" href="${e(prefix || './')}">${logo('logo-compact.svg')}</a><nav aria-label="Головна навігація">${link(prefix, 'katalog/', 'Каталог')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, producerPath, 'Про виробника')}</nav>${headerPhone}<a class="basket" href="${e(prefix)}koshyk/">Кошик <span id="cart-count">0</span></a></div></header>
-<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}</nav>${contactLinks()}<nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav><p class="footer-delivery">${e(config.localDeliveryTerms)}</p><small>© 2026 ${e(config.siteName)}</small></div></footer><aside id="cookie-consent" class="cookie-consent" hidden aria-label="Налаштування cookies"><p>Ми використовуємо cookies для аналітики та покращення роботи сайту.</p><div><button class="button primary" data-consent="accept">Прийняти</button><button class="button secondary" data-consent="reject">Відхилити</button></div></aside><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
+<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}${link(prefix, termsPath, 'Умови продажу')}${link(prefix, privacyPath, 'Політика конфіденційності')}</nav>${contactLinks()}<nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav><p class="footer-delivery">${e(config.localDeliveryTerms)}</p><small>© 2026 ${e(config.siteName)}</small></div></footer><aside id="cookie-consent" class="cookie-consent" hidden aria-label="Налаштування cookies"><p>Ми використовуємо cookies для аналітики та покращення роботи сайту.</p><div><button class="button primary" data-consent="accept">Прийняти</button><button class="button secondary" data-consent="reject">Відхилити</button></div></aside><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
 }
 const indexable = [...pages].filter(([, page]) => !page.noindex);
 await writeFile('dist/sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
