@@ -1,5 +1,6 @@
 import { config } from './config.mjs';
 import { money, escape, productPath, selectSets } from './shop.mjs';
+import { trackAddToCart, trackOrderConversion } from './analytics.mjs';
 
 const storageKey = 'golden-roe-cart-v1';
 const maxOrderItems = 30;
@@ -114,6 +115,10 @@ document.addEventListener('click', async event => {
     }
     cart = next;
     saveCart();
+    try {
+      const catalog = await getProducts();
+      trackAddToCart(items.map(item => catalog.find(product => product.id === item)).filter(Boolean).map(product => ({ ...product, quantity: 1 })));
+    } catch { /* Cart stays usable when analytics data is unavailable. */ }
     confirmAdd(button);
   } catch {
     announce('Не вдалося додати товар. Спробуйте ще раз.');
@@ -312,9 +317,11 @@ if (form) {
         result.textContent = 'Для безкоштовної доставки додайте ще ' + (config.shippingThresholdGrams - actualGrams) + ' г або виберіть самовивіз.';
         return;
       }
-      const response = await config.submitOrder({ ...fields, phone: '+380' + digits,
+      const order = { ...fields, phone: '+380' + digits,
         items: lines.map(({ id, name, quantity, price, weight }) => ({ id, title: name, qty: quantity, price, grams: weight })),
-        total: payable });
+        total: payable };
+      const response = await config.submitOrder(order);
+      trackOrderConversion(response, order);
       for (const { id, quantity } of lines) {
         const remaining = (cart[id] ?? 0) - quantity;
         if (remaining > 0) cart[id] = remaining;

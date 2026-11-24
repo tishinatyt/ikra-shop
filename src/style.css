@@ -257,6 +257,11 @@ textarea{resize:vertical}
 #cart-total{font-weight:600}
 .notice{position:fixed;right:1rem;bottom:1rem;padding:.65rem 1rem;margin:0;border-radius:var(--card-radius);background:var(--deep);color:var(--frost);z-index:7;max-width:calc(100% - 2rem)}
 .notice:empty,#order-result:empty{display:none}
+.cookie-consent{display:flex;align-items:center;justify-content:space-between;gap:.75rem;max-width:78rem;margin:1rem auto;padding:.75rem 1rem;border:1px solid var(--tin);border-radius:var(--card-radius);background:#fbf6ee;color:var(--deep);box-shadow:0 4px 18px rgba(42,26,20,.12)}
+.cookie-consent[hidden]{display:none}
+.cookie-consent p{margin:0;font-size:.9rem}
+.cookie-consent div{display:flex;flex:none;gap:.5rem}
+.cookie-consent .button{padding:.45rem .75rem;font-size:.9rem}
 .roe-flight{position:fixed;left:0;top:0;z-index:10;pointer-events:none;width:18px;height:18px;border-radius:50%;background:radial-gradient(ellipse at 34% 27%,#fff 0 8%,transparent 16%),radial-gradient(circle at 35% 34%,#ffb375 4%,var(--roe) 46%,#812405 100%);box-shadow:inset -2px -2px 4px #792004}
 
 @media(min-width:440px){.wrap{width:min(100% - 3rem,78rem)}}
@@ -278,6 +283,9 @@ textarea{resize:vertical}
   .header .wordmark img{height:36px}
 }
 @media(max-width:480px){
+  .cookie-consent{margin:.75rem 1rem;padding:.65rem;align-items:flex-start;flex-direction:column}
+  .cookie-consent div{width:100%}
+  .cookie-consent .button{flex:1}
   .header{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:.45rem;padding-block:.5rem}
   .header nav{grid-area:2/1/3/4;margin:0;font-size:.84rem;gap:.35rem .8rem}
   .header .wordmark img{max-width:100%;height:auto;max-height:36px}

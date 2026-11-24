@@ -361,6 +361,8 @@ await rm(outputRoot, { recursive: true, force: true });
 await mkdir(outputRoot, { recursive: true });
 await cp('src/style.css', 'dist/style.css');
 await cp('src/app.mjs', 'dist/app.mjs');
+await writeFile('dist/analytics.mjs', (await readFile('src/analytics.mjs', 'utf8'))
+  .replace("from '../config.mjs'", "from './config.mjs'"));
 await cp('src/shop.mjs', 'dist/shop.mjs');
 await mkdir('dist/assets/js', { recursive: true });
 await cp('assets/js/roe.js', 'dist/assets/js/roe.js');
@@ -434,9 +436,19 @@ for (const [path, page] of pages) {
   const logo = (file, lazy = false) => '<img src="' + brand + file + '" alt="' + e(brandAlt) + '" width="455" height="106"' + (lazy ? ' loading="lazy"' : '') + '>';
   const description = e(page.description);
   const title = e(page.title);
+  const analyticsProduct = products.find(p => productPath(p) === path);
+  const analyticsHead = `<script>
+(function(){var host=location.hostname,debug=new URLSearchParams(location.search).get('gtag_debug')==='1';if(!debug&&(host==='localhost'||host==='127.0.0.1'||/^192\\.168\\./.test(host)))return;
+window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments)};
+gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});
+gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',region:['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IS','IE','IT','LV','LI','LT','LU','MT','NL','NO','PL','PT','RO','SK','SI','ES','SE','CH','GB'],wait_for_update:500});
+gtag('js',new Date());gtag('config','${config.analytics.ga4}');gtag('config','${config.analytics.googleAds}');
+var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${config.analytics.ga4}';s.onerror=function(){};document.head.appendChild(s);
+})();
+</script>`;
   const output = path.endsWith('.html') ? path : path + 'index.html';
   await mkdir('dist/' + output.slice(0, output.lastIndexOf('/') + 1), { recursive: true });
-  await writeFile('dist/' + output, `<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  await writeFile('dist/' + output, `<!doctype html><html lang="uk"><head>${analyticsHead}<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${title}</title><meta name="description" content="${description}">
 <meta property="og:site_name" content="${e(config.siteName)}">
 <meta name="theme-color" content="#2a1a14">
@@ -449,11 +461,13 @@ ${page.noindex ? '<meta name="robots" content="noindex">' : ''}
 ${base ? '<link rel="canonical" href="' + e(absolute(path)) + '"><meta property="og:url" content="' + e(absolute(path)) + '">' : ''}
 <meta property="og:locale" content="uk_UA"><meta property="og:type" content="${path.startsWith('produkt/') ? 'product' : 'website'}"><meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:image" content="${e(absolute(page.image || 'media/og-image.jpg'))}">
 <link rel="preload" href="${e(prefix)}fonts/playfair-display-cyrillic-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="${e(prefix)}style.css"><script type="module" src="${e(prefix)}app.mjs"></script>
+<link rel="stylesheet" href="${e(prefix)}style.css">
+<script>window.__ikraProduct=${json(analyticsProduct ? (({ id, name, price }) => ({ id, name, price }))(analyticsProduct) : null)};</script>
+<script type="module" src="${e(prefix)}analytics.mjs"></script><script type="module" src="${e(prefix)}app.mjs"></script>
 ${path === '' ? '<script defer src="assets/js/roe.js"></script>' : ''}
 <script type="application/ld+json">${json([{ ...organization, logo: base ? absolute(organizationLogo) : prefix + organizationLogo }, ...page.structured])}</script></head><body>
 <a class="skip" href="#main">До вмісту</a><header><div class="wrap header"><a class="wordmark" href="${e(prefix || './')}">${logo('logo-compact.svg')}</a><nav aria-label="Головна навігація">${link(prefix, 'katalog/', 'Каталог')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, producerPath, 'Про виробника')}</nav>${headerPhone}<a class="basket" href="${e(prefix)}koshyk/">Кошик <span id="cart-count">0</span></a></div></header>
-<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}</nav>${contactLinks()}<nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav><p class="footer-delivery">${e(config.localDeliveryTerms)}</p><small>© 2026 ${e(config.siteName)}</small></div></footer><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
+<main id="main">${page.body}</main><footer><div class="wrap footer"><span class="wordmark">${logo('logo-dark.svg', true)}</span><nav aria-label="Інформація">${link(prefix, producerPath, 'Про виробника')}${link(prefix, deliveryPath, 'Доставка')}${link(prefix, '#faq', 'Запитання')}</nav>${contactLinks()}<nav class="footer-varieties" aria-label="Види ікри">${varietyLinks(prefix)}</nav><p class="footer-delivery">${e(config.localDeliveryTerms)}</p><small>© 2026 ${e(config.siteName)}</small></div></footer><aside id="cookie-consent" class="cookie-consent" hidden aria-label="Налаштування cookies"><p>Ми використовуємо cookies для аналітики та покращення роботи сайту.</p><div><button class="button primary" data-consent="accept">Прийняти</button><button class="button secondary" data-consent="reject">Відхилити</button></div></aside><p id="notice" class="notice" role="status"></p><span id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span></body></html>`);
 }
 const indexable = [...pages].filter(([, page]) => !page.noindex);
 await writeFile('dist/sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +

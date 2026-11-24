@@ -1,4 +1,12 @@
 export const config = {
+  analytics: {
+    ga4: 'G-TCSPL6WXF6',
+    googleAds: 'AW-18593348016',
+    conversions: {
+      order: 'AW-18593348016/dxdmCMvKxr4dELDz_6FF',
+      call: 'AW-18593348016/BHdZCM7Kxr4dELDz_6FF'
+    }
+  },
   siteName: 'Золоте зерно. Червона ікра',
   shortName: 'Золоте зерно',
   siteUrl: 'https://ikra.fun',
@@ -38,6 +46,6 @@ export const config = {
     if (data?.ok !== true || !/^ZZ-\d{4}-\d{4}$/.test(data.orderNumber ?? '')) {
       throw failure('UNAVAILABLE');
     }
-    return { message: 'Замовлення №' + data.orderNumber + ' прийнято. Дякуємо! Зв’яжемося для підтвердження.' };
+    return { ok: true, orderId: data.orderNumber, message: 'Замовлення №' + data.orderNumber + ' прийнято. Дякуємо! Зв’яжемося для підтвердження.' };
   }
 };
